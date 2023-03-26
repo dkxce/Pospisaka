@@ -1,0 +1,11 @@
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\bin\Debug\DigitalCertAndSignMaker.exe.config
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\bin\Debug\DigitalCertAndSignMaker.exe
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\bin\Debug\DigitalCertAndSignMaker.pdb
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\Digital Signature Maker and Checker.csproj.AssemblyReference.cache
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\Digital Signature Maker and Checker.csproj.SuggestedBindingRedirects.cache
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\DigitalCertAndSignMaker.Properties.Resources.resources
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\Digital Signature Maker and Checker.csproj.GenerateResource.cache
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\Digital Signature Maker and Checker.csproj.CoreCompileInputs.cache
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\DigitalCertAndSignMaker.exe
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\DigitalCertAndSignMaker.pdb
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\DigitalCertAndSignMaker\obj\Debug\DigitalCertAndSignMaker.MainForm.resources

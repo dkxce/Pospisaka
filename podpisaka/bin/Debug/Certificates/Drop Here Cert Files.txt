@@ -1,0 +1,3 @@
+PKCS12 files which contains the certificate and private key of the signer:
+*.pfx
+*.p12
