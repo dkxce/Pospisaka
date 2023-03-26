@@ -46,6 +46,8 @@ namespace DigitalCertAndSignMaker
             AppendMenu(hSysMenu, 0x800, 0x03, string.Empty);            
             AppendMenu(hSysMenu, 0x000, 0x04, "Создать ярлык на Рабочем столе");
             AppendMenu(hSysMenu, 0x000, 0x05, "Создать ярлык в меню Пуск");
+            AppendMenu(hSysMenu, 0x800, 0x06, string.Empty);            
+            AppendMenu(hSysMenu, 0x000, 0x07, "Открыть менеджер сертификатов Windows ... ");
         }
 
         protected override void WndProc(ref Message m)
@@ -85,6 +87,10 @@ namespace DigitalCertAndSignMaker
                     sl.Save();
                 }
                 catch { };
+            };  
+            if ((m.Msg == 0x112) && ((int)m.WParam == 0x07))
+            {
+                try { System.Diagnostics.Process.Start("certmgr.msc"); } catch { };
             };            
         }
 
@@ -564,7 +570,7 @@ namespace DigitalCertAndSignMaker
         private void DetailizeCert(CertificateHash h)
         {
             List<string> colored1 = new List<string>(new string[] { "E" });
-            List<string> colored2 = new List<string>(new string[] { "ИНН", "ИННЮЛ", "ОГРН", "ОГРНИП", "СНИЛС" });
+            List<string> colored2 = new List<string>(new string[] { "ЮЛ", "ИНН", "ИННЮЛ", "ОГРН", "ОГРНИП", "СНИЛС" });
             List<string> colored3 = new List<string>(new string[] { "НАЛОГОВАЯ" });
 
             Func<string, string, string, ListViewItem> AddItm = (t1, t2, t3) =>
