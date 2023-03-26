@@ -25,7 +25,7 @@ namespace DigitalCertAndSignMaker
 
         private string formCaption = "ПОДПИСАКА";
         private string webURLS = "https://github.com/dkxce";
-        private string webURL = "https://github.com/dkxce/Podpisaka";
+        private string webURL = "https://github.com/dkxce/Pospisaka";
 
         private bool firstLoad = true;
         private string iniPath = Path.Combine(XMLSaved<int>.CurrentDirectory(), "podpisaka.xml");        
