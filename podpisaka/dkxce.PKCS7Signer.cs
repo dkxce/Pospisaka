@@ -1,23 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Text.RegularExpressions;
 using Pkcs = System.Security.Cryptography.Pkcs;
 using X509 = System.Security.Cryptography.X509Certificates;
-using System.Xml;
 using System.Xml.Serialization;
-using System.Data.SqlClient;
 using System.Windows.Forms;
 using System.Security.Cryptography;
 
 // https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.pkcs.signedcms.computesignature?view=windowsdesktop-7.0#system-security-cryptography-pkcs-signedcms-computesignature
+// https://www.cryptopro.ru/forum2/default.aspx?g=posts&t=893
 
 namespace dkxce
 {
@@ -384,7 +379,22 @@ namespace dkxce
             CmsSigner signer = new Pkcs.CmsSigner(_PrivateCert);
             // Sign the message.
             signed.ComputeSignature(signer);
-            cert = signed.Certificates[0];            
+            cert = signed.Certificates[0];
+            // Encode the message.
+            return signed.Encode();
+        }
+
+        public byte[] SignDetachedBytes(byte[] messageBytes, out X509Certificate2 cert)
+        {
+            // The dataToSign byte array holds the data to be signed.
+            ContentInfo content = new ContentInfo(messageBytes);
+            // Create a new, detached SignedCms message.
+            SignedCms signed = new SignedCms(content, true);
+            // Set Signer
+            CmsSigner signer = new Pkcs.CmsSigner(_PrivateCert);
+            // Sign the message.
+            signed.ComputeSignature(signer);
+            cert = signed.Certificates[0];
             // Encode the message.
             return signed.Encode();
         }
@@ -411,7 +421,30 @@ namespace dkxce
             };
             return signature;
         }
-       
+
+        public byte[] SignFile(string fileName, bool detached, out X509Certificate2 cert)
+        {
+            return detached ? SignDetachedFile(fileName, out cert) : SignFile(fileName, out cert);
+        }
+
+        public byte[] SignDetachedFile(string fileName, out X509Certificate2 cert)
+        {
+            byte[] messageBytes = new byte[0];
+            {
+                FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                messageBytes = new byte[fs.Length];
+                fs.Read(messageBytes, 0, messageBytes.Length);
+                fs.Close();
+            };
+            byte[] signature = SignDetachedBytes(messageBytes, out cert);
+            {
+                FileStream fs = new FileStream(fileName + ".detached.p7s", FileMode.Create, FileAccess.Write);
+                fs.Write(signature, 0, signature.Length);
+                fs.Close();
+            };
+            return signature;
+        }
+
         private string Base64Encode(byte[] encoded)
         {
             const string PKCS7_HEADER = "-----BEGIN PKCS7-----";
@@ -436,7 +469,7 @@ namespace dkxce
         public static bool CheckSignBytes(byte[] encodedMessage, byte[] originalBytes, bool verifySignatureOnly, out X509Certificate2 certInfo)
         {
             // Create a new, nondetached SignedCms message.
-            SignedCms signedCms = new SignedCms();
+            SignedCms signedCms = new SignedCms();            
             // encodedMessage is the encoded message received from the sender.
             signedCms.Decode(encodedMessage);
             // Verify the signature without validating the certificate.
@@ -448,8 +481,46 @@ namespace dkxce
                 for (int i = 0; i < signedCms.ContentInfo.Content.Length; i++)
                     if (signedCms.ContentInfo.Content[i] != originalBytes[i])
                         throw new Exception("Исходный файл был изменен!");
-            };
+            }
+            else
+                throw new Exception("Подпись верна, но исходный файл не найден.");
             return true;
+        }
+
+        public static bool CheckSignDetachedBytes(byte[] encodedMessage, byte[] originalBytes, bool verifySignatureOnly, out X509Certificate2 certInfo)
+        {
+            // Create a new, nondetached SignedCms message.
+            SignedCms signedCms = new SignedCms(new ContentInfo(originalBytes), true);
+            // encodedMessage is the encoded message received from the sender.
+            signedCms.Decode(encodedMessage);
+            // Verify the signature without validating the certificate.
+            signedCms.CheckSignature(verifySignatureOnly);
+            certInfo = signedCms.Certificates[0];            
+            return true;
+        }
+
+        public static bool CheckSignFile(string p7sFileName, string originFileName, bool verifySignatureOnly, out X509Certificate2 cert)
+        {
+            cert = null;
+            byte[] encodedMessage = new byte[0];
+            {
+                FileStream fs = new FileStream(p7sFileName, FileMode.Open, FileAccess.Read);
+                encodedMessage = new byte[fs.Length];
+                fs.Read(encodedMessage, 0, encodedMessage.Length);
+                fs.Close();
+            };
+            byte[] originalMessage = null;
+            {
+                FileStream fs = new FileStream(originFileName, FileMode.Open, FileAccess.Read);
+                originalMessage = new byte[fs.Length];
+                fs.Read(originalMessage, 0, encodedMessage.Length);
+                fs.Close();
+            };
+
+            bool res = false;
+            if (!res) try { res = CheckSignDetachedBytes(encodedMessage, originalMessage, verifySignatureOnly, out cert); } catch { };
+            if (!res) try { res = CheckSignBytes(encodedMessage, originalMessage, verifySignatureOnly, out cert); } catch (Exception ex) { throw ex; };
+            return res;
         }
 
         /// <summary>
@@ -471,7 +542,13 @@ namespace dkxce
             {
                 int extL = Path.GetExtension(p7sFileName).Length;
                 string originalFile = p7sFileName.Substring(0, p7sFileName.Length - extL);
-                if (File.Exists(originalFile))
+                bool fileExists = File.Exists(originalFile);
+                if ((!fileExists) && Path.GetExtension(originalFile).ToLower() == ".detached")
+                {
+                    originalFile = originalFile.Substring(0, originalFile.Length - 9);
+                    fileExists = File.Exists(originalFile);
+                };
+                if (fileExists)
                 {
                     FileStream fs = new FileStream(originalFile, FileMode.Open, FileAccess.Read);
                     originalMessage = new byte[fs.Length];
@@ -480,6 +557,36 @@ namespace dkxce
                 };
             };
             return CheckSignBytes(encodedMessage, originalMessage, verifySignatureOnly, out cert);
+        }
+
+        public static bool CheckSignDetachedFile(string p7sFileName, bool verifySignatureOnly, out X509Certificate2 cert)
+        {
+            byte[] encodedMessage = new byte[0];
+            {
+                FileStream fs = new FileStream(p7sFileName, FileMode.Open, FileAccess.Read);
+                encodedMessage = new byte[fs.Length];
+                fs.Read(encodedMessage, 0, encodedMessage.Length);
+                fs.Close();
+            };
+            byte[] originalMessage = null;
+            {
+                int extL = Path.GetExtension(p7sFileName).Length;
+                string originalFile = p7sFileName.Substring(0, p7sFileName.Length - extL);
+                bool fileExists = File.Exists(originalFile);
+                if ((!fileExists) && Path.GetExtension(originalFile).ToLower() == ".detached")
+                {
+                    originalFile = originalFile.Substring(0, originalFile.Length - 9);
+                    fileExists = File.Exists(originalFile);
+                };
+                if(fileExists)
+                {
+                    FileStream fs = new FileStream(originalFile, FileMode.Open, FileAccess.Read);
+                    originalMessage = new byte[fs.Length];
+                    fs.Read(originalMessage, 0, originalMessage.Length);
+                    fs.Close();
+                };
+            };
+            return CheckSignDetachedBytes(encodedMessage, originalMessage, verifySignatureOnly, out cert);
         }
 
         public static string CurrentDirectory()

@@ -60,7 +60,13 @@
             this.delCur = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.optBtn = new System.Windows.Forms.ToolStripMenuItem();
             this.dsval = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem10 = new System.Windows.Forms.ToolStripSeparator();
+            this.sm1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.sm2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.sm3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.sm4 = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip5 = new System.Windows.Forms.StatusStrip();
             this.fileStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -79,6 +85,8 @@
             this.panel4 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.tabFile = new System.Windows.Forms.TabPage();
+            this.statusStrip3 = new System.Windows.Forms.StatusStrip();
+            this.fii = new System.Windows.Forms.ToolStripStatusLabel();
             this.filesListView = new System.Windows.Forms.ListView();
             this.columnHeader21 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader22 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -88,18 +96,6 @@
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabCERT = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.cInfo = new System.Windows.Forms.ListView();
-            this.columnHeader53 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader54 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader55 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.panel5 = new System.Windows.Forms.Panel();
-            this.label4 = new System.Windows.Forms.Label();
-            this.storageSelector = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.statusStrip2 = new System.Windows.Forms.StatusStrip();
-            this.ssc = new System.Windows.Forms.ToolStripStatusLabel();
             this.certList = new System.Windows.Forms.ListView();
             this.columnHeader26 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader31 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -110,11 +106,23 @@
             this.columnHeader41 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader42 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader43 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.statusStrip2 = new System.Windows.Forms.StatusStrip();
+            this.ssc = new System.Windows.Forms.ToolStripStatusLabel();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.storageSelector = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.cInfo = new System.Windows.Forms.ListView();
+            this.columnHeader53 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader54 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader55 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.txtLogOut = new System.Windows.Forms.TabControl();
             this.logPage = new System.Windows.Forms.TabPage();
             this.logg = new System.Windows.Forms.TextBox();
-            this.statusStrip3 = new System.Windows.Forms.StatusStrip();
-            this.fii = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnView = new System.Windows.Forms.ToolStripMenuItem();
             this.sertMenuStrip.SuspendLayout();
             this.filesMenuStrip.SuspendLayout();
             this.statusStrip5.SuspendLayout();
@@ -122,16 +130,16 @@
             this.statusStrip1.SuspendLayout();
             this.panel4.SuspendLayout();
             this.tabFile.SuspendLayout();
+            this.statusStrip3.SuspendLayout();
             this.tabCERT.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            this.panel5.SuspendLayout();
             this.statusStrip2.SuspendLayout();
+            this.panel5.SuspendLayout();
             this.txtLogOut.SuspendLayout();
             this.logPage.SuspendLayout();
-            this.statusStrip3.SuspendLayout();
             this.SuspendLayout();
             // 
             // sertMenuStrip
@@ -218,6 +226,8 @@
             this.adScanned,
             this.addScanned2,
             this.toolStripMenuItem9,
+            this.btnView,
+            this.toolStripMenuItem11,
             this.tdSignAll,
             this.tdCheckAll,
             this.tdSCAll,
@@ -233,9 +243,9 @@
             this.delCur,
             this.toolStripMenuItem7,
             this.toolStripMenuItem5,
-            this.dsval});
+            this.optBtn});
             this.filesMenuStrip.Name = "filesMenuStrip";
-            this.filesMenuStrip.Size = new System.Drawing.Size(464, 348);
+            this.filesMenuStrip.Size = new System.Drawing.Size(464, 398);
             this.filesMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.filesMenuStrip_Opening);
             // 
             // addfs
@@ -368,12 +378,60 @@
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
             this.toolStripMenuItem5.Size = new System.Drawing.Size(460, 6);
             // 
+            // optBtn
+            // 
+            this.optBtn.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dsval,
+            this.toolStripMenuItem10,
+            this.sm1,
+            this.sm2,
+            this.sm3,
+            this.sm4});
+            this.optBtn.Name = "optBtn";
+            this.optBtn.Size = new System.Drawing.Size(463, 22);
+            this.optBtn.Text = "Опции подписи и проверки...";
+            // 
             // dsval
             // 
             this.dsval.Name = "dsval";
-            this.dsval.Size = new System.Drawing.Size(463, 22);
+            this.dsval.Size = new System.Drawing.Size(497, 22);
             this.dsval.Text = "Проверять валидность сертификата";
             this.dsval.Click += new System.EventHandler(this.dsval_Click);
+            // 
+            // toolStripMenuItem10
+            // 
+            this.toolStripMenuItem10.Name = "toolStripMenuItem10";
+            this.toolStripMenuItem10.Size = new System.Drawing.Size(494, 6);
+            // 
+            // sm1
+            // 
+            this.sm1.Name = "sm1";
+            this.sm1.Size = new System.Drawing.Size(497, 22);
+            this.sm1.Text = "Формировать подпись с полным содержимым документа";
+            this.sm1.Click += new System.EventHandler(this.sm1_Click);
+            // 
+            // sm2
+            // 
+            this.sm2.Name = "sm2";
+            this.sm2.Size = new System.Drawing.Size(497, 22);
+            this.sm2.Text = "Формировать отдельную подпись (без содержимого документа)";
+            this.sm2.Click += new System.EventHandler(this.sm2_Click);
+            // 
+            // sm3
+            // 
+            this.sm3.Checked = true;
+            this.sm3.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.sm3.Name = "sm3";
+            this.sm3.Size = new System.Drawing.Size(497, 22);
+            this.sm3.Text = "Формировать оба типа подписей";
+            this.sm3.Click += new System.EventHandler(this.sm3_Click);
+            // 
+            // sm4
+            // 
+            this.sm4.Name = "sm4";
+            this.sm4.Size = new System.Drawing.Size(497, 22);
+            this.sm4.Text = "Формировать отдельную подпись (не применять суффикс файла `detached`)";
+            this.sm4.Click += new System.EventHandler(this.sm4_Click);
             // 
             // statusStrip5
             // 
@@ -524,6 +582,25 @@
             this.tabFile.Text = "Файлы";
             this.tabFile.UseVisualStyleBackColor = true;
             // 
+            // statusStrip3
+            // 
+            this.statusStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fii});
+            this.statusStrip3.Location = new System.Drawing.Point(3, 369);
+            this.statusStrip3.Name = "statusStrip3";
+            this.statusStrip3.Size = new System.Drawing.Size(1184, 22);
+            this.statusStrip3.SizingGrip = false;
+            this.statusStrip3.TabIndex = 11;
+            this.statusStrip3.Text = "statusStrip3";
+            // 
+            // fii
+            // 
+            this.fii.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.fii.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.fii.Name = "fii";
+            this.fii.Size = new System.Drawing.Size(22, 17);
+            this.fii.Text = "---";
+            // 
             // filesListView
             // 
             this.filesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -612,125 +689,6 @@
             this.splitContainer1.SplitterDistance = 872;
             this.splitContainer1.TabIndex = 3;
             // 
-            // cInfo
-            // 
-            this.cInfo.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader53,
-            this.columnHeader54,
-            this.columnHeader55});
-            this.cInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cInfo.FullRowSelect = true;
-            this.cInfo.GridLines = true;
-            this.cInfo.HideSelection = false;
-            this.cInfo.Location = new System.Drawing.Point(0, 0);
-            this.cInfo.Name = "cInfo";
-            this.cInfo.ShowGroups = false;
-            this.cInfo.Size = new System.Drawing.Size(308, 388);
-            this.cInfo.TabIndex = 10;
-            this.cInfo.UseCompatibleStateImageBehavior = false;
-            this.cInfo.View = System.Windows.Forms.View.Details;
-            this.cInfo.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.cInfo_ColumnClick);
-            // 
-            // columnHeader53
-            // 
-            this.columnHeader53.Text = "Тип";
-            this.columnHeader53.Width = 88;
-            // 
-            // columnHeader54
-            // 
-            this.columnHeader54.Text = "Имя";
-            this.columnHeader54.Width = 74;
-            // 
-            // columnHeader55
-            // 
-            this.columnHeader55.Text = "Значение";
-            this.columnHeader55.Width = 284;
-            // 
-            // panel5
-            // 
-            this.panel5.Controls.Add(this.label1);
-            this.panel5.Controls.Add(this.textBox1);
-            this.panel5.Controls.Add(this.button1);
-            this.panel5.Controls.Add(this.storageSelector);
-            this.panel5.Controls.Add(this.label4);
-            this.panel5.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel5.Location = new System.Drawing.Point(0, 0);
-            this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(872, 30);
-            this.panel5.TabIndex = 8;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(5, 8);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(143, 13);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Хранилище сертификатов:";
-            // 
-            // storageSelector
-            // 
-            this.storageSelector.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.storageSelector.FormattingEnabled = true;
-            this.storageSelector.Items.AddRange(new object[] {
-            "Текущий пользователь (CurrentUser)",
-            "Локальный компьютер (LocalMachine)",
-            "Добавленные перетаскиванием",
-            "Каталог программы",
-            "Избранное",
-            "Последние использованные"});
-            this.storageSelector.Location = new System.Drawing.Point(150, 4);
-            this.storageSelector.Name = "storageSelector";
-            this.storageSelector.Size = new System.Drawing.Size(360, 21);
-            this.storageSelector.TabIndex = 1;
-            this.storageSelector.SelectedIndexChanged += new System.EventHandler(this.storageSelector_SelectedIndexChanged);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(516, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(108, 23);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Обновить";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(677, 4);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(192, 20);
-            this.textBox1.TabIndex = 3;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(630, 8);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(41, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Найти:";
-            // 
-            // statusStrip2
-            // 
-            this.statusStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ssc});
-            this.statusStrip2.Location = new System.Drawing.Point(0, 366);
-            this.statusStrip2.Name = "statusStrip2";
-            this.statusStrip2.Size = new System.Drawing.Size(872, 22);
-            this.statusStrip2.SizingGrip = false;
-            this.statusStrip2.TabIndex = 11;
-            this.statusStrip2.Text = "statusStrip2";
-            // 
-            // ssc
-            // 
-            this.ssc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.ssc.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.ssc.Name = "ssc";
-            this.ssc.Size = new System.Drawing.Size(22, 17);
-            this.ssc.Text = "---";
-            // 
             // certList
             // 
             this.certList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -807,6 +765,125 @@
             this.columnHeader43.Text = "Thumbprint";
             this.columnHeader43.Width = 83;
             // 
+            // statusStrip2
+            // 
+            this.statusStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ssc});
+            this.statusStrip2.Location = new System.Drawing.Point(0, 366);
+            this.statusStrip2.Name = "statusStrip2";
+            this.statusStrip2.Size = new System.Drawing.Size(872, 22);
+            this.statusStrip2.SizingGrip = false;
+            this.statusStrip2.TabIndex = 11;
+            this.statusStrip2.Text = "statusStrip2";
+            // 
+            // ssc
+            // 
+            this.ssc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.ssc.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.ssc.Name = "ssc";
+            this.ssc.Size = new System.Drawing.Size(22, 17);
+            this.ssc.Text = "---";
+            // 
+            // panel5
+            // 
+            this.panel5.Controls.Add(this.label1);
+            this.panel5.Controls.Add(this.textBox1);
+            this.panel5.Controls.Add(this.button1);
+            this.panel5.Controls.Add(this.storageSelector);
+            this.panel5.Controls.Add(this.label4);
+            this.panel5.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel5.Location = new System.Drawing.Point(0, 0);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(872, 30);
+            this.panel5.TabIndex = 8;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(630, 8);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(41, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Найти:";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(677, 4);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(192, 20);
+            this.textBox1.TabIndex = 3;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(516, 3);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(108, 23);
+            this.button1.TabIndex = 2;
+            this.button1.Text = "Обновить";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // storageSelector
+            // 
+            this.storageSelector.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.storageSelector.FormattingEnabled = true;
+            this.storageSelector.Items.AddRange(new object[] {
+            "Текущий пользователь (CurrentUser)",
+            "Локальный компьютер (LocalMachine)",
+            "Добавленные перетаскиванием",
+            "Каталог программы",
+            "Избранное",
+            "Последние использованные"});
+            this.storageSelector.Location = new System.Drawing.Point(150, 4);
+            this.storageSelector.Name = "storageSelector";
+            this.storageSelector.Size = new System.Drawing.Size(360, 21);
+            this.storageSelector.TabIndex = 1;
+            this.storageSelector.SelectedIndexChanged += new System.EventHandler(this.storageSelector_SelectedIndexChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(5, 8);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(143, 13);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Хранилище сертификатов:";
+            // 
+            // cInfo
+            // 
+            this.cInfo.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader53,
+            this.columnHeader54,
+            this.columnHeader55});
+            this.cInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cInfo.FullRowSelect = true;
+            this.cInfo.GridLines = true;
+            this.cInfo.HideSelection = false;
+            this.cInfo.Location = new System.Drawing.Point(0, 0);
+            this.cInfo.Name = "cInfo";
+            this.cInfo.ShowGroups = false;
+            this.cInfo.Size = new System.Drawing.Size(308, 388);
+            this.cInfo.TabIndex = 10;
+            this.cInfo.UseCompatibleStateImageBehavior = false;
+            this.cInfo.View = System.Windows.Forms.View.Details;
+            this.cInfo.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.cInfo_ColumnClick);
+            // 
+            // columnHeader53
+            // 
+            this.columnHeader53.Text = "Тип";
+            this.columnHeader53.Width = 88;
+            // 
+            // columnHeader54
+            // 
+            this.columnHeader54.Text = "Имя";
+            this.columnHeader54.Width = 74;
+            // 
+            // columnHeader55
+            // 
+            this.columnHeader55.Text = "Значение";
+            this.columnHeader55.Width = 284;
+            // 
             // txtLogOut
             // 
             this.txtLogOut.Controls.Add(this.tabCERT);
@@ -843,24 +920,18 @@
             this.logg.Size = new System.Drawing.Size(1184, 388);
             this.logg.TabIndex = 0;
             // 
-            // statusStrip3
+            // toolStripMenuItem11
             // 
-            this.statusStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fii});
-            this.statusStrip3.Location = new System.Drawing.Point(3, 369);
-            this.statusStrip3.Name = "statusStrip3";
-            this.statusStrip3.Size = new System.Drawing.Size(1184, 22);
-            this.statusStrip3.SizingGrip = false;
-            this.statusStrip3.TabIndex = 11;
-            this.statusStrip3.Text = "statusStrip3";
+            this.toolStripMenuItem11.Name = "toolStripMenuItem11";
+            this.toolStripMenuItem11.Size = new System.Drawing.Size(460, 6);
             // 
-            // fii
+            // btnView
             // 
-            this.fii.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.fii.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.fii.Name = "fii";
-            this.fii.Size = new System.Drawing.Size(22, 17);
-            this.fii.Text = "---";
+            this.btnView.Name = "btnView";
+            this.btnView.ShortcutKeys = System.Windows.Forms.Keys.F2;
+            this.btnView.Size = new System.Drawing.Size(463, 22);
+            this.btnView.Text = "Просмотреть содержимое текущего файла ...";
+            this.btnView.Click += new System.EventHandler(this.btnView_Click);
             // 
             // MainForm
             // 
@@ -889,21 +960,21 @@
             this.panel4.PerformLayout();
             this.tabFile.ResumeLayout(false);
             this.tabFile.PerformLayout();
+            this.statusStrip3.ResumeLayout(false);
+            this.statusStrip3.PerformLayout();
             this.tabCERT.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            this.panel5.ResumeLayout(false);
-            this.panel5.PerformLayout();
             this.statusStrip2.ResumeLayout(false);
             this.statusStrip2.PerformLayout();
+            this.panel5.ResumeLayout(false);
+            this.panel5.PerformLayout();
             this.txtLogOut.ResumeLayout(false);
             this.logPage.ResumeLayout(false);
             this.logPage.PerformLayout();
-            this.statusStrip3.ResumeLayout(false);
-            this.statusStrip3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -944,7 +1015,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel ssn;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
-        private System.Windows.Forms.ToolStripMenuItem dsval;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
         private System.Windows.Forms.ToolStripMenuItem delCur;
@@ -995,6 +1065,15 @@
         private System.Windows.Forms.TextBox logg;
         private System.Windows.Forms.StatusStrip statusStrip3;
         private System.Windows.Forms.ToolStripStatusLabel fii;
+        private System.Windows.Forms.ToolStripMenuItem optBtn;
+        private System.Windows.Forms.ToolStripMenuItem dsval;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem10;
+        private System.Windows.Forms.ToolStripMenuItem sm1;
+        private System.Windows.Forms.ToolStripMenuItem sm2;
+        private System.Windows.Forms.ToolStripMenuItem sm3;
+        private System.Windows.Forms.ToolStripMenuItem sm4;
+        private System.Windows.Forms.ToolStripMenuItem btnView;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem11;
     }
 }
 

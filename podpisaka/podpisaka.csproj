@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="dkxce.PKCS7Signer.cs" />
+    <Compile Include="FileAss.cs" />
     <Compile Include="ListViewSorter.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MainForm.cs">

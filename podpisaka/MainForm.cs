@@ -2,16 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Policy;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Xml;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
 namespace DigitalCertAndSignMaker
 {
@@ -57,6 +50,7 @@ namespace DigitalCertAndSignMaker
             txtLogOut.SelectedIndex = iniFile.lastPageSelected;
             storageSelector.SelectedIndex = iniFile.lastStorageSelected;
             SetCurrentCert(iniFile.currentCertificate);
+            ClickSM(iniFile.signCreateMethod);
             dsval.Checked = iniFile.checkCertValid;
 
             if (iniFile.CSLVHL != null)
@@ -69,8 +63,21 @@ namespace DigitalCertAndSignMaker
 
             if (iniFile.FFLVHL != null)
                 for (int i = 0; i < iniFile.FFLVHL.Length; i++)
-                    filesListView.Columns[i].Width = iniFile.FFLVHL[i];
+                    filesListView.Columns[i].Width = iniFile.FFLVHL[i];            
         }       
+
+        private void ProcessCmdArgFiles()
+        {
+            string[] args = System.Environment.GetCommandLineArgs();
+            if (args.Length < 2) return;
+            List<string> files = new List<string>();
+            for (int i = 1; i < args.Length; i++)
+            {
+                try { if (!File.Exists(args[i])) continue; } catch { continue; };
+                files.Add(args[i]);
+            };
+            ProcessDroppedFiles(files.ToArray(), "Передано");
+        }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -153,6 +160,7 @@ namespace DigitalCertAndSignMaker
             delCur.Enabled = filesListView.SelectedItems.Count > 0;
             sicur.Enabled = filesListView.SelectedItems.Count > 0;
             if(filesListView.SelectedItems.Count > 0) sicur.Text = String.Format("{0} текущий (Enter)", filesListView.SelectedItems[0].SubItems[2].Text == "документ" ? "Подписать" : "Проверить");
+            btnView.Enabled = filesListView.SelectedItems.Count > 0 && (!signExt.Contains(Path.GetExtension(filesListView.SelectedItems[0].SubItems[1].Text).ToLower()));
         }
 
         private void tdClearAll_Click(object sender, EventArgs e)
@@ -289,6 +297,8 @@ namespace DigitalCertAndSignMaker
         private void MainForm_Shown(object sender, EventArgs e)
         {
             firstLoad = false;
+            RegisterFileAssociations();
+            ProcessCmdArgFiles();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -402,8 +412,10 @@ namespace DigitalCertAndSignMaker
                 fii.Text = "";
                 return;
             };
-            string tmp = filesListView.SelectedItems[0].SubItems[5].Text;
-            if (!string.IsNullOrEmpty(tmp)) fileStatus.Text = tmp;
+            
+            if (!string.IsNullOrEmpty(filesListView.SelectedItems[0].SubItems[5].Text)) fileStatus.Text = filesListView.SelectedItems[0].SubItems[5].Text;
+            else if (!string.IsNullOrEmpty(filesListView.SelectedItems[0].SubItems[4].Text)) fileStatus.Text = filesListView.SelectedItems[0].SubItems[4].Text;
+            else fileStatus.Text = filesListView.SelectedItems[0].SubItems[3].Text;
 
             try
             {
@@ -439,6 +451,7 @@ namespace DigitalCertAndSignMaker
             if (filesListView.SelectedItems.Count == 0) return;
             bool sign = filesListView.SelectedItems[0].SubItems[2].Text == "документ";
             ProcessFiles(sign, !sign, new List<string>(new string[] { filesListView.SelectedItems[0].SubItems[1].Text } ));
+            filesListView_SelectedIndexChanged(sender, e);
         }
 
         private void restat_Click(object sender, EventArgs e)
@@ -588,6 +601,54 @@ namespace DigitalCertAndSignMaker
         private void filesListView_DoubleClick(object sender, EventArgs e)
         {
             sicur_Click(sender, e);
+        }
+
+        private void RegisterFileAssociations()
+        {
+            string[] sext = new string[] { "txt", "rtf", "pwi", "ttf", "doc", "docx", "docm", "dot", "dotx", "epub", "ods", "odt", "pdf", "pot", "potm", "potx", "pps", "ppsm", "ppsx", "ppt", "pptm", "pptx", "sldm", "wps", "xar", "xls", "xlsb", "xlsm", "xlsx", "xlt", "xltm", "xltx", "xml", "xps" };           
+            foreach(string s in sext)
+                FileAss.SetFileAssociation(s, null, "sign", System.Reflection.Assembly.GetExecutingAssembly().Location, "Подписать подписакой");
+
+            string[] cext = new string[] { "p7s", "sig", "sgn" };
+            foreach (string s in cext)
+                FileAss.SetFileAssociation(s, null, "check", System.Reflection.Assembly.GetExecutingAssembly().Location, "Проверить подписакой");
+            
+            FileAss.UpdateExplorer();
+        }
+
+        private void sm1_Click(object sender, EventArgs e)
+        {
+            ClickSM(1);
+        }
+
+        private void sm2_Click(object sender, EventArgs e)
+        {
+            ClickSM(2);
+        }
+
+        private void sm3_Click(object sender, EventArgs e)
+        {
+            ClickSM(3);
+        }
+
+        private void sm4_Click(object sender, EventArgs e)
+        {
+            ClickSM(4);
+        }
+
+        private void ClickSM(byte index)
+        {
+            sm1.Checked = index == 1;
+            sm2.Checked = index == 2;
+            sm3.Checked = index == 3;
+            sm4.Checked = index == 4;
+            iniFile.signCreateMethod = (byte)index;
+        }
+
+        private void btnView_Click(object sender, EventArgs e)
+        {
+            try { System.Diagnostics.Process.Start(filesListView.SelectedItems[0].SubItems[1].Text); }
+            catch { };
         }
     }
 }

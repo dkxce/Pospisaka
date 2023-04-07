@@ -35,7 +35,7 @@ namespace DigitalCertAndSignMaker
         private (int, bool) _cInfoSortBy = (-1, true);
 
         private List<string> certExt = new List<string>(new string[] { ".p12", ".pfx", ".crt", ".p7b", ".cer", ".pem" });
-        private List<string> signExt = new List<string>(new string[] { ".p7s" });
+        private List<string> signExt = new List<string>(new string[] { ".p7s", ".sig", ".sgn" });
 
         protected override void OnHandleCreated(EventArgs e)
         {
@@ -399,8 +399,22 @@ namespace DigitalCertAndSignMaker
                     if (ch.Certificate != null) s = new PKCS7Signer(ch.Certificate);
                     else s = new PKCS7Signer(ch.File, pass);
                     lvi.SubItems[3].Text = status = $"Подписание...";
-                    Application.DoEvents();                   
-                    s.SignFile(fn, out _);
+                    Application.DoEvents();
+
+                    // Attached
+                    if (iniFile.signCreateMethod == 1 || iniFile.signCreateMethod == 3)
+                        s.SignFile(fn, out _);
+                    // Detached
+                    if (iniFile.signCreateMethod == 2 || iniFile.signCreateMethod == 3 || iniFile.signCreateMethod == 4)
+                    {
+                        s.SignDetachedFile(fn, out _);
+                        if (iniFile.signCreateMethod == 4)
+                        {
+                            File.Delete($"{fn}.p7s");
+                            File.Move($"{fn}.detached.p7s", $"{fn}.p7s");
+                        };
+                    };
+
                     lvi.BackColor = Color.LightSkyBlue;
                     lvi.SubItems[3].Text = status = $"Подписан: {DateTime.Now}";
                     Logger.AddLine($"  - Подписан: {DateTime.Now}", false);
@@ -413,7 +427,7 @@ namespace DigitalCertAndSignMaker
                 catch (Exception ex)
                 {
                     lvi.BackColor = Color.LightPink;
-                    lvi.SubItems[3].Text = status = $"Ошибка: {ex.Message}";
+                    lvi.SubItems[3].Text = status = $"Ошибка: {ex.Message.Replace("\r", " ").Replace("\n", " ")}";
                     Logger.AddLine($"  - Ошибка: {ex.Message}", false);
                     Application.DoEvents();
                     Logger.AddLine("", false);
@@ -424,6 +438,7 @@ namespace DigitalCertAndSignMaker
             if(check)
             {
                 X509Certificate2 c = null;
+                string submsg = "";
                 try
                 {
                     Logger.AddLine("");
@@ -431,7 +446,13 @@ namespace DigitalCertAndSignMaker
                     Logger.AddLine($"  - Файл: {fn}", false);
                     FileInfo fi = new FileInfo(fn);
                     Logger.AddLine($"  - Размер: {GetFileSize(fn, out _)}, создан: {fi.CreationTime}, изменен: {fi.LastWriteTime}", false);
-                    bool ok = PKCS7Signer.CheckSignFile(fn, !iniFile.checkCertValid, out c);                    
+
+                    bool ok = false;                    
+                    // Detached
+                    if (!ok) try { submsg = " - подпись без содержимого документа"; ok = PKCS7Signer.CheckSignDetachedFile(fn, !iniFile.checkCertValid, out c); } catch { };
+                    // Attached
+                    if (!ok) try { submsg = " - подпись с полным содержимым документа"; ok = PKCS7Signer.CheckSignFile(fn, !iniFile.checkCertValid, out c); } catch (Exception ex) { throw ex; };                    
+
                     lvi.SubItems[3].Text = status = ok ? $"Подпись верна: {DateTime.Now}" : $"Неверная подпись: {DateTime.Now}";
                     Logger.AddLine(ok ? $"  - Подпись верна: {DateTime.Now}" : $"  - Неверная подпись: {DateTime.Now}", false);
                     if (ok) lvi.BackColor = Color.LightGreen; else lvi.BackColor = Color.LightPink;
@@ -439,7 +460,9 @@ namespace DigitalCertAndSignMaker
                     {
                         CertificateHash chc = new CertificateHash { Certificate = c };
                         lvi.SubItems[4].Text = chc.Thumbprint;
-                        lvi.SubItems[5].Text = GetPriorityText(chc);
+                        string cinfo = GetPriorityText(chc) + submsg;
+                        lvi.SubItems[5].Text = cinfo;
+                        Logger.AddLine($"  - Сертификат: {cinfo}", false);
                     }
                     else
                     {
@@ -452,12 +475,38 @@ namespace DigitalCertAndSignMaker
                 }
                 catch (Exception ex)
                 {
-                    lvi.BackColor = Color.OrangeRed;
-                    lvi.SubItems[3].Text = status = $"Ошибка: {ex.Message}";
-                    Logger.AddLine($"  - Ошибка: {ex.Message}", false);
-                    Logger.AddLine("", false);
-                    Application.DoEvents();
-                    return false;
+                    if (ex.Message.Contains("Подпись верна"))
+                    {
+                        lvi.BackColor = Color.Pink;
+                        lvi.SubItems[3].Text = status = $"{ex.Message} {DateTime.Now}";
+                        Logger.AddLine($"  - Предупреждение: {ex.Message}", false);                        
+                        if (c != null)
+                        {
+                            CertificateHash chc = new CertificateHash { Certificate = c };
+                            lvi.SubItems[4].Text = chc.Thumbprint;
+                            string cinfo = GetPriorityText(chc) + submsg;
+                            lvi.SubItems[5].Text = cinfo;
+                            Logger.AddLine($"  - {cinfo}", false);
+                        }
+                        else
+                        {
+                            lvi.SubItems[4].Text = "НЕИЗВЕСТЕН";
+                            Logger.AddLine($"  - Сертификат: Сертификат неизвестен", false);
+                        };
+                        Logger.AddLine("", false);
+                        Application.DoEvents();
+                        return true;
+                    }
+                    else
+                    {
+
+                        lvi.BackColor = Color.OrangeRed;
+                        lvi.SubItems[3].Text = status = $"Ошибка: {ex.Message.Replace("\r", " ").Replace("\n", " ")}";
+                        Logger.AddLine($"  - Ошибка: {ex.Message}", false);
+                        Logger.AddLine("", false);
+                        Application.DoEvents();
+                        return false;
+                    };
                 };
             };
 

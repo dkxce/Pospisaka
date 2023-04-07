@@ -19,6 +19,9 @@ namespace DigitalCertAndSignMaker
         [XmlElement("CheckCertificateValidity")]
         public bool checkCertValid = false;
 
+        [XmlElement("SignatureCreationMethod")]
+        public byte signCreateMethod = 3;
+
         [XmlElement("CurrentCertificate")]
         public string currentCertificate = null;
 
