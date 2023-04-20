@@ -20,3 +20,4 @@ C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\podpisaka\obj\Debug\podpisak
 C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\podpisaka\bin\Debug\podpisaka.exe.config
 C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\podpisaka\bin\Debug\podpisaka.exe
 C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\podpisaka\bin\Debug\podpisaka.pdb
+C:\Users\dkxce\source\repos\DigitalCertAndSignMaker\podpisaka\obj\Debug\podpisaka.csproj.CopyComplete

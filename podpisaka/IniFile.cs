@@ -46,6 +46,12 @@ namespace DigitalCertAndSignMaker
         [XmlElement("ImportScanPath")]
         public string ImportScanPath = null;
 
+        [XmlElement("AddStampMode")]
+        public byte AddStampMode = 0; // 0 - no add, 1 - add to new file, 2 - add to source file
+
+        [XmlElement("AddStampFile")]
+        public string AddStampFile = "C:\\Downloads\\Шаблон_штампа_сертификата.png";
+
         [XmlArray("CSLVHL")]
         public int[] CSLVHL = null;
 

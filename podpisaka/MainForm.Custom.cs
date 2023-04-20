@@ -1,4 +1,6 @@
 ﻿using dkxce;
+using iTextSharp.text.pdf.parser;
+using iTextSharp.text.pdf;
 using podpisaka;
 using System;
 using System.Collections.Generic;
@@ -6,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
@@ -241,6 +244,23 @@ namespace DigitalCertAndSignMaker
                 if (signExt.Contains(ext)) sign = true;
                 AddFile(f, sign, false);
             };
+            addSiSaBox.SelectedIndex = iniFile.AddStampMode;
+            addSiFiBox.SelectedIndex = PreLoadStamps(iniFile.AddStampFile);
+        }
+
+        private int PreLoadStamps(string fileName)
+        {
+            string cd = XMLSaved<int>.CurrentDirectory();
+            string[] files = Directory.GetFiles(cd, "*.png", SearchOption.AllDirectories);
+            int res = 0;
+            foreach(string f in files)
+            {
+                string fn = f.Remove(0, cd.Length);
+                addSiFiles.Items.Add(fn);
+                addSiFiBox.Items.Add(fn);
+                if (fn == fileName) res = addSiFiBox.Items.Count - 1;
+            };
+            return res;
         }
 
         public static string GetFileSize(string filename, out long size)
@@ -385,6 +405,13 @@ namespace DigitalCertAndSignMaker
             
             string fn = lvi.SubItems[1].Text;
 
+            if (iniFile.AddStampMode == 1)
+            {
+                string nfn = fn.Remove(fn.Length - Path.GetExtension(fn).Length) + "_stamped.pdf";
+                File.Copy(fn, nfn, true);
+                fn = nfn;
+            };
+
             if (sign)
             {
                 PKCS7Signer s = null;
@@ -400,6 +427,31 @@ namespace DigitalCertAndSignMaker
                     else s = new PKCS7Signer(ch.File, pass);
                     lvi.SubItems[3].Text = status = $"Подписание...";
                     Application.DoEvents();
+
+                    // Stamped
+                    // nuget:   https://www.nuget.org/packages/iTextSharp/5.0.5
+                    // Samples: https://simpledotnetsolutions.wordpress.com/2012/04/08/itextsharp-few-c-examples/
+                    // github:  https://github.com/dkxce/iTextSharp
+                    if(iniFile.AddStampMode > 0)
+                    {
+                        string stampFile = Path.Combine(XMLSaved<int>.CurrentDirectory(), iniFile.AddStampFile);
+                        if(string.IsNullOrEmpty(stampFile) || (!File.Exists(stampFile)))
+                            Logger.AddLine($"  - Файл штампа не найден: {iniFile.AddStampFile}", false);
+                        else
+                        {                            
+                            if (AddStamp(stampFile, ch, fn))
+                            {                                
+                                Logger.AddLine($"  - Добавлен штамп в файл: {fn}", false);
+                            }
+                            else
+                            {
+                                File.Delete($"{fn}.stamped.pdf");
+                                if (fn != lvi.SubItems[1].Text) File.Delete(fn);
+                                fn = lvi.SubItems[1].Text;
+                                Logger.AddLine($"  - Штамп не был добавлен", false);
+                            };
+                        };
+                    };
 
                     // Attached
                     if (iniFile.signCreateMethod == 1 || iniFile.signCreateMethod == 3)
@@ -512,6 +564,198 @@ namespace DigitalCertAndSignMaker
 
             Application.DoEvents();
             return false;
+        }
+
+        private void AddStampCertInfo(Bitmap bmp, List<string> text = null)
+        {
+            List<PointF> points = new List<PointF>();
+            for(int h = 0;h < bmp.Height;h++)
+                for(int w = 0; w< bmp.Width;w++)
+                {
+                    Color c = bmp.GetPixel(w, h);
+                    if(c.R == 0 && c.G == 255 & c.B == 0 && AddStampSertInfo_CheckAround(bmp, w,h))
+                    {
+                        points.Add(new PointF(w, h));
+                        AddStampSertInfo_ClearAround(bmp, w, h);
+                    };
+                };
+            if(points.Count > 1 && text != null && text.Count > 0)
+            {
+                float textSize = 0;
+                for (int i = 1; i < points.Count; i++) textSize += points[i].Y - points[i - 1].Y;
+                textSize = textSize / (points.Count - 1) / 2;
+                textSize = textSize * 96.0f / bmp.VerticalResolution;
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    for (int i = 0; i < text.Count && i < points.Count; i++)
+                    {
+                        string txt = text[i];
+                        Font f = new Font("PT Sans", textSize, i == 1 ? FontStyle.Bold : FontStyle.Regular);
+                        while ((g.MeasureString(txt, f).Width + points[i].X + 10) > bmp.Width) txt = txt.Remove(txt.Length - 1);
+                        g.DrawString(txt, f, Brushes.Black, points[i]);
+                    };
+                };
+            };
+        }
+
+
+        private void AddStampToPDF(string fn, string newFileName = null)
+        {
+            CertificateHash ch = null;
+            if (string.IsNullOrEmpty(iniFile.currentCertificate))
+            {
+                fileStatus.Text = "Не выбран сертификат для подписи";
+                return;
+            }
+            else
+            {
+                ch = GetCurrentCert(iniFile.currentCertificate);
+                if (ch == null || (!string.IsNullOrEmpty(ch.File) && (!File.Exists(ch.File))))
+                {
+                    fileStatus.Text = "Не найден сертификат для подписи";
+                    return;
+                };
+            };
+
+            try
+            {
+                string stampFile = Path.Combine(XMLSaved<int>.CurrentDirectory(), iniFile.AddStampFile);
+                if (string.IsNullOrEmpty(stampFile) || (!File.Exists(stampFile)))
+                    MessageBox.Show($"Файл штампа не найден: {iniFile.AddStampFile}", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else
+                {
+                    if (!string.IsNullOrEmpty(newFileName))
+                    {
+                        File.Copy(fn, newFileName, true);
+                        fn = newFileName;
+                    };
+                    bool added = AddStamp(stampFile, ch, fn);
+                    if (added)
+                        MessageBox.Show($"Штамп успешно добавлен в файл `{Path.GetFileName(fn)}`", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    else
+                    {
+                        try { if((!string.IsNullOrEmpty(newFileName)) && File.Exists(fn)) File.Delete(newFileName); } catch { };
+                        MessageBox.Show($"Не удалось добавить штамп в файл `{Path.GetFileName(fn)}`\r\n\r\nВозможно штам уже был добавлен ранее!", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    };
+                };
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{ex.Message}", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            };
+        }
+
+        private bool AddStamp(string stampFile, CertificateHash ch, string fn)
+        {
+            const string annot_name = "podpisaka_stamp_thumbprint";
+
+            // Prepare Image
+            List<string> sInfo = new List<string>(new string[] { ch.Thumbprint, ch.Owner, $"c {ch.From:dd.MM.yyyy} по {ch.Till:dd.MM.yyyy}" });
+            Bitmap bmp = (Bitmap)Bitmap.FromFile(stampFile);
+            AddStampCertInfo(bmp, sInfo);
+
+            bool modified = false;
+            bool annotated = false;
+            int lastAddedPage = 0;
+
+            using (FileStream inputPdfStream = new FileStream(fn, FileMode.Open))
+            using (FileStream outputPdfStream = new FileStream($"{fn}.stamped.pdf", FileMode.Create))
+            {
+                PdfReader reader = new PdfReader(inputPdfStream);                
+                PdfReaderContentParser parser = new PdfReaderContentParser(reader);
+                PdfStamper stamper = new PdfStamper(reader, outputPdfStream);
+                
+                // Resize Image
+                iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(bmp, System.Drawing.Imaging.ImageFormat.Png);
+                image.ScaleAbsolute((float)image.Width / (float)image.DpiX * 96.0f, (float)image.Height / (float)image.DpiY * 96.0f);
+                
+                // Get Last Added Page    
+                {
+                    PdfDictionary pg = reader.GetPageN(1);
+                    PdfArray annotArray = pg.GetAsArray(PdfName.ANNOTS);
+                    if(annotArray != null)
+                        for (int j = 0; j < annotArray.Size; ++j)
+                        {
+                            PdfDictionary curAnnot = annotArray.GetAsDict(j);
+                            PdfString name = curAnnot.GetAsString(PdfName.TITLE);
+                            PdfString contents = curAnnot.GetAsString(PdfName.CONTENTS);
+                            if (name?.ToString() == annot_name && contents?.ToString() == ch.Thumbprint)
+                            {
+                                annotated = true;
+
+                                PdfString lastpage = curAnnot.GetAsString(PdfName.LASTPAGE);
+                                string lp = lastpage?.ToString();
+                                if (!string.IsNullOrEmpty(lp)) lastAddedPage = int.Parse(lp);
+                                try { curAnnot.Remove(PdfName.LASTPAGE); } catch { };
+                                curAnnot.Put(PdfName.LASTPAGE, new PdfString($"{reader.NumberOfPages}"));
+                                break;
+                            };
+                        };
+                };
+
+                // Add Stamps
+                for (int i = lastAddedPage + 1; i <= reader.NumberOfPages; i++)
+                {
+                    TextMarginFinder finder = parser.ProcessContent(i, new TextMarginFinder());
+                    float ph = reader.GetPageSize(i).Height;
+                    float th = finder.GetHeight();
+                    float imtop = Math.Max(10, (ph - th - 120) - image.PlainHeight);
+                    image.SetAbsolutePosition(25, imtop);
+                    PdfContentByte pdfContentByte = stamper.GetOverContent(i);
+                    pdfContentByte.AddImage(image);
+                    modified = true;
+                };
+                if((!annotated) && modified)
+                    AddStampSertInfo_Annotation(stamper, annot_name, ch.Thumbprint, reader.NumberOfPages);
+                stamper.Close();
+                reader.Close();
+            };
+            if (modified)
+            {
+                File.Delete(fn);
+                File.Move($"{fn}.stamped.pdf", fn);
+                return true;
+            }
+            else
+            {
+                File.Delete($"{fn}.stamped.pdf");
+                return false;
+            };
+        }
+
+        private void AddStampSertInfo_Annotation(PdfStamper stamper, string annot_name, string annot_text, int pages)
+        {
+            PdfAnnotation pa = new PdfAnnotation(stamper.Writer, new iTextSharp.text.Rectangle(0, 0));
+            pa.Put(PdfName.TITLE, new PdfString(annot_name));
+            pa.Put(PdfName.CONTENTS, new PdfString(annot_text));
+            pa.Put(PdfName.FIRSTPAGE, new PdfString("1"));
+            pa.Put(PdfName.LASTPAGE, new PdfString($"{pages}"));
+            pa.Put(PdfName.TYPE, PdfName.ANNOT);
+            stamper.AddAnnotation(pa, 1);
+        }
+
+        private bool AddStampSertInfo_CheckAround(Bitmap bmp, int x, int y)
+        {
+            if ((x == 0) || (y == 0) || (x == (bmp.Width - 1)) || (y == (bmp.Height - 1))) return false;
+            for (int w = x - 1; w <= x + 1; w++)
+                for (int h = y - 1; h <= y + 1; h++)
+                    if (w == x && h == y)
+                        continue;
+                    else
+                    {
+                        Color c = bmp.GetPixel(w, h);
+                        if (c.R != 255 || c.G != 255 || c.B != 255) return false;
+                    };
+            return true;
+        }
+
+        private bool AddStampSertInfo_ClearAround(Bitmap bmp, int x, int y)
+        {
+            if ((x == 0) || (y == 0) || (x == (bmp.Width - 1)) || (y == (bmp.Height - 1))) return false;
+            for (int w = x - 1; w <= x + 1; w++)
+                for (int h = y - 1; h <= y + 1; h++)
+                    bmp.SetPixel(w, h, Color.FromArgb(0, 255, 255, 255));
+            return true;
         }
 
         private void ReloadTextLog()

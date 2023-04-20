@@ -160,7 +160,7 @@ namespace DigitalCertAndSignMaker
             delCur.Enabled = filesListView.SelectedItems.Count > 0;
             sicur.Enabled = filesListView.SelectedItems.Count > 0;
             if(filesListView.SelectedItems.Count > 0) sicur.Text = String.Format("{0} текущий (Enter)", filesListView.SelectedItems[0].SubItems[2].Text == "документ" ? "Подписать" : "Проверить");
-            btnView.Enabled = filesListView.SelectedItems.Count > 0 && (!signExt.Contains(Path.GetExtension(filesListView.SelectedItems[0].SubItems[1].Text).ToLower()));
+            stnew.Enabled = btnStamp.Enabled = btnView.Enabled = filesListView.SelectedItems.Count > 0 && (!signExt.Contains(Path.GetExtension(filesListView.SelectedItems[0].SubItems[1].Text).ToLower()));
         }
 
         private void tdClearAll_Click(object sender, EventArgs e)
@@ -649,6 +649,44 @@ namespace DigitalCertAndSignMaker
         {
             try { System.Diagnostics.Process.Start(filesListView.SelectedItems[0].SubItems[1].Text); }
             catch { };
+        }
+
+        private void addSiSaBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            iniFile.AddStampMode = (byte)addSiSaBox.SelectedIndex;
+        }
+
+        private void addSiFiBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string f = addSiFiBox.Text;
+            if(f == "Нет") iniFile.AddStampFile = ""; else iniFile.AddStampFile = f;
+        }
+
+        private void addSiFiles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (addSiFiles.SelectedItems.Count == 0) return;
+            addSiFiBox.SelectedIndex = addSiFiles.SelectedIndex + 1;
+        }
+
+        private void btnStamp_Click(object sender, EventArgs e)
+        {
+            if (filesListView.SelectedItems.Count == 0) return;
+            string fn = filesListView.SelectedItems[0].SubItems[1].Text;
+            AddStampToPDF(fn);
+        }
+
+        private void stnew_Click(object sender, EventArgs e)
+        {
+            if (filesListView.SelectedItems.Count == 0) return;
+            string fn = filesListView.SelectedItems[0].SubItems[1].Text;
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = Path.GetDirectoryName(fn);
+            sfd.Filter = "PDF Files (*.pdf)|*.pdf";
+            sfd.FileName = $"{Path.Combine(Path.GetDirectoryName(fn), Path.GetFileNameWithoutExtension(fn) + "_stamped" + Path.GetExtension(fn))}";
+            sfd.DefaultExt = ".pdf";
+            if(sfd.ShowDialog() == DialogResult.OK)
+                AddStampToPDF(fn, sfd.FileName);
+            sfd.Dispose();
         }
     }
 }
