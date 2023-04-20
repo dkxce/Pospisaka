@@ -47,6 +47,7 @@
             this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripSeparator();
             this.btnView = new System.Windows.Forms.ToolStripMenuItem();
             this.btnStamp = new System.Windows.Forms.ToolStripMenuItem();
+            this.stnew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripSeparator();
             this.tdSignAll = new System.Windows.Forms.ToolStripMenuItem();
             this.tdCheckAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -130,7 +131,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.addSiSaBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.stnew = new System.Windows.Forms.ToolStripMenuItem();
+            this.label6 = new System.Windows.Forms.Label();
+            this.fBox = new System.Windows.Forms.ComboBox();
             this.sertMenuStrip.SuspendLayout();
             this.filesMenuStrip.SuspendLayout();
             this.statusStrip5.SuspendLayout();
@@ -258,7 +260,7 @@
             this.toolStripMenuItem5,
             this.optBtn});
             this.filesMenuStrip.Name = "filesMenuStrip";
-            this.filesMenuStrip.Size = new System.Drawing.Size(575, 482);
+            this.filesMenuStrip.Size = new System.Drawing.Size(575, 454);
             this.filesMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.filesMenuStrip_Opening);
             // 
             // addfs
@@ -302,6 +304,14 @@
             this.btnStamp.Size = new System.Drawing.Size(574, 24);
             this.btnStamp.Text = "Добавить штамп подписи в текущий файл ...";
             this.btnStamp.Click += new System.EventHandler(this.btnStamp_Click);
+            // 
+            // stnew
+            // 
+            this.stnew.Name = "stnew";
+            this.stnew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
+            this.stnew.Size = new System.Drawing.Size(574, 24);
+            this.stnew.Text = "Добавить штамп подписи и сохранить в новый файл ...";
+            this.stnew.Click += new System.EventHandler(this.stnew_Click);
             // 
             // toolStripMenuItem11
             // 
@@ -472,10 +482,9 @@
             this.statusStrip5.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip5.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileStatus});
-            this.statusStrip5.Location = new System.Drawing.Point(0, 648);
+            this.statusStrip5.Location = new System.Drawing.Point(0, 522);
             this.statusStrip5.Name = "statusStrip5";
-            this.statusStrip5.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip5.Size = new System.Drawing.Size(1597, 26);
+            this.statusStrip5.Size = new System.Drawing.Size(1198, 26);
             this.statusStrip5.TabIndex = 7;
             this.statusStrip5.Text = "statusStrip5";
             // 
@@ -492,9 +501,8 @@
             this.panel1.Controls.Add(this.panel4);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1597, 130);
+            this.panel1.Size = new System.Drawing.Size(1198, 106);
             this.panel1.TabIndex = 8;
             // 
             // statusStrip1
@@ -502,10 +510,9 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ssn});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 104);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 80);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1597, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(1198, 26);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
@@ -534,11 +541,10 @@
             this.selSert.FullRowSelect = true;
             this.selSert.GridLines = true;
             this.selSert.HideSelection = false;
-            this.selSert.Location = new System.Drawing.Point(0, 20);
-            this.selSert.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.selSert.Location = new System.Drawing.Point(0, 16);
             this.selSert.Name = "selSert";
             this.selSert.ShowGroups = false;
-            this.selSert.Size = new System.Drawing.Size(1597, 84);
+            this.selSert.Size = new System.Drawing.Size(1198, 69);
             this.selSert.TabIndex = 9;
             this.selSert.UseCompatibleStateImageBehavior = false;
             this.selSert.View = System.Windows.Forms.View.Details;
@@ -596,9 +602,8 @@
             this.panel4.Controls.Add(this.label3);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel4.Location = new System.Drawing.Point(0, 0);
-            this.panel4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(1597, 20);
+            this.panel4.Size = new System.Drawing.Size(1198, 16);
             this.panel4.TabIndex = 8;
             // 
             // label3
@@ -606,9 +611,8 @@
             this.label3.AutoSize = true;
             this.label3.Dock = System.Windows.Forms.DockStyle.Left;
             this.label3.Location = new System.Drawing.Point(0, 0);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(251, 16);
+            this.label3.Size = new System.Drawing.Size(228, 15);
             this.label3.TabIndex = 0;
             this.label3.Text = "Выбранный сертификат для подписи:";
             // 
@@ -616,11 +620,10 @@
             // 
             this.tabFile.Controls.Add(this.statusStrip3);
             this.tabFile.Controls.Add(this.filesListView);
-            this.tabFile.Location = new System.Drawing.Point(4, 25);
-            this.tabFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabFile.Location = new System.Drawing.Point(4, 22);
             this.tabFile.Name = "tabFile";
-            this.tabFile.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabFile.Size = new System.Drawing.Size(1589, 489);
+            this.tabFile.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabFile.Size = new System.Drawing.Size(1190, 395);
             this.tabFile.TabIndex = 0;
             this.tabFile.Text = "Файлы";
             this.tabFile.UseVisualStyleBackColor = true;
@@ -630,10 +633,9 @@
             this.statusStrip3.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fii});
-            this.statusStrip3.Location = new System.Drawing.Point(4, 459);
+            this.statusStrip3.Location = new System.Drawing.Point(3, 366);
             this.statusStrip3.Name = "statusStrip3";
-            this.statusStrip3.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip3.Size = new System.Drawing.Size(1581, 26);
+            this.statusStrip3.Size = new System.Drawing.Size(1184, 26);
             this.statusStrip3.SizingGrip = false;
             this.statusStrip3.TabIndex = 11;
             this.statusStrip3.Text = "statusStrip3";
@@ -660,12 +662,11 @@
             this.filesListView.FullRowSelect = true;
             this.filesListView.GridLines = true;
             this.filesListView.HideSelection = false;
-            this.filesListView.Location = new System.Drawing.Point(4, 4);
-            this.filesListView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.filesListView.Location = new System.Drawing.Point(3, 3);
             this.filesListView.MultiSelect = false;
             this.filesListView.Name = "filesListView";
             this.filesListView.ShowGroups = false;
-            this.filesListView.Size = new System.Drawing.Size(1581, 481);
+            this.filesListView.Size = new System.Drawing.Size(1184, 389);
             this.filesListView.TabIndex = 5;
             this.filesListView.UseCompatibleStateImageBehavior = false;
             this.filesListView.View = System.Windows.Forms.View.Details;
@@ -708,11 +709,10 @@
             // tabCERT
             // 
             this.tabCERT.Controls.Add(this.splitContainer1);
-            this.tabCERT.Location = new System.Drawing.Point(4, 25);
-            this.tabCERT.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabCERT.Location = new System.Drawing.Point(4, 22);
             this.tabCERT.Name = "tabCERT";
-            this.tabCERT.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabCERT.Size = new System.Drawing.Size(1589, 489);
+            this.tabCERT.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabCERT.Size = new System.Drawing.Size(1190, 390);
             this.tabCERT.TabIndex = 7;
             this.tabCERT.Text = "Сертификаты";
             this.tabCERT.UseVisualStyleBackColor = true;
@@ -720,8 +720,7 @@
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(4, 4);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -733,9 +732,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.cInfo);
-            this.splitContainer1.Size = new System.Drawing.Size(1581, 481);
-            this.splitContainer1.SplitterDistance = 1164;
-            this.splitContainer1.SplitterWidth = 5;
+            this.splitContainer1.Size = new System.Drawing.Size(1184, 384);
+            this.splitContainer1.SplitterDistance = 871;
             this.splitContainer1.TabIndex = 3;
             // 
             // certList
@@ -755,12 +753,11 @@
             this.certList.FullRowSelect = true;
             this.certList.GridLines = true;
             this.certList.HideSelection = false;
-            this.certList.Location = new System.Drawing.Point(0, 37);
-            this.certList.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.certList.Location = new System.Drawing.Point(0, 30);
             this.certList.MultiSelect = false;
             this.certList.Name = "certList";
             this.certList.ShowGroups = false;
-            this.certList.Size = new System.Drawing.Size(1164, 418);
+            this.certList.Size = new System.Drawing.Size(871, 328);
             this.certList.TabIndex = 9;
             this.certList.UseCompatibleStateImageBehavior = false;
             this.certList.View = System.Windows.Forms.View.Details;
@@ -820,10 +817,9 @@
             this.statusStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ssc});
-            this.statusStrip2.Location = new System.Drawing.Point(0, 455);
+            this.statusStrip2.Location = new System.Drawing.Point(0, 358);
             this.statusStrip2.Name = "statusStrip2";
-            this.statusStrip2.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip2.Size = new System.Drawing.Size(1164, 26);
+            this.statusStrip2.Size = new System.Drawing.Size(871, 26);
             this.statusStrip2.SizingGrip = false;
             this.statusStrip2.TabIndex = 11;
             this.statusStrip2.Text = "statusStrip2";
@@ -845,36 +841,32 @@
             this.panel5.Controls.Add(this.label4);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel5.Location = new System.Drawing.Point(0, 0);
-            this.panel5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(1164, 37);
+            this.panel5.Size = new System.Drawing.Size(871, 30);
             this.panel5.TabIndex = 8;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(840, 10);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(630, 8);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(51, 16);
+            this.label1.Size = new System.Drawing.Size(47, 15);
             this.label1.TabIndex = 4;
             this.label1.Text = "Найти:";
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(903, 5);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox1.Location = new System.Drawing.Point(677, 4);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(255, 22);
+            this.textBox1.Size = new System.Drawing.Size(192, 20);
             this.textBox1.TabIndex = 3;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(688, 4);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Location = new System.Drawing.Point(516, 3);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(144, 28);
+            this.button1.Size = new System.Drawing.Size(108, 23);
             this.button1.TabIndex = 2;
             this.button1.Text = "Обновить";
             this.button1.UseVisualStyleBackColor = true;
@@ -891,20 +883,18 @@
             "Каталог программы",
             "Избранное",
             "Последние использованные"});
-            this.storageSelector.Location = new System.Drawing.Point(200, 5);
-            this.storageSelector.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.storageSelector.Location = new System.Drawing.Point(150, 4);
             this.storageSelector.Name = "storageSelector";
-            this.storageSelector.Size = new System.Drawing.Size(479, 24);
+            this.storageSelector.Size = new System.Drawing.Size(360, 21);
             this.storageSelector.TabIndex = 1;
             this.storageSelector.SelectedIndexChanged += new System.EventHandler(this.storageSelector_SelectedIndexChanged);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 10);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(5, 8);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(181, 16);
+            this.label4.Size = new System.Drawing.Size(165, 15);
             this.label4.TabIndex = 0;
             this.label4.Text = "Хранилище сертификатов:";
             // 
@@ -919,10 +909,9 @@
             this.cInfo.GridLines = true;
             this.cInfo.HideSelection = false;
             this.cInfo.Location = new System.Drawing.Point(0, 0);
-            this.cInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cInfo.Name = "cInfo";
             this.cInfo.ShowGroups = false;
-            this.cInfo.Size = new System.Drawing.Size(412, 481);
+            this.cInfo.Size = new System.Drawing.Size(309, 384);
             this.cInfo.TabIndex = 10;
             this.cInfo.UseCompatibleStateImageBehavior = false;
             this.cInfo.View = System.Windows.Forms.View.Details;
@@ -950,22 +939,20 @@
             this.txtLogOut.Controls.Add(this.logPage);
             this.txtLogOut.Controls.Add(this.tabPage1);
             this.txtLogOut.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtLogOut.Location = new System.Drawing.Point(0, 130);
-            this.txtLogOut.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtLogOut.Location = new System.Drawing.Point(0, 106);
             this.txtLogOut.Name = "txtLogOut";
             this.txtLogOut.SelectedIndex = 0;
-            this.txtLogOut.Size = new System.Drawing.Size(1597, 518);
+            this.txtLogOut.Size = new System.Drawing.Size(1198, 416);
             this.txtLogOut.TabIndex = 0;
             this.txtLogOut.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // logPage
             // 
             this.logPage.Controls.Add(this.logg);
-            this.logPage.Location = new System.Drawing.Point(4, 25);
-            this.logPage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.logPage.Location = new System.Drawing.Point(4, 22);
             this.logPage.Name = "logPage";
-            this.logPage.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.logPage.Size = new System.Drawing.Size(1589, 483);
+            this.logPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.logPage.Size = new System.Drawing.Size(1190, 395);
             this.logPage.TabIndex = 8;
             this.logPage.Text = "Лог";
             this.logPage.UseVisualStyleBackColor = true;
@@ -974,27 +961,27 @@
             // 
             this.logg.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.logg.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.logg.Location = new System.Drawing.Point(4, 4);
-            this.logg.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.logg.Location = new System.Drawing.Point(3, 3);
             this.logg.Multiline = true;
             this.logg.Name = "logg";
             this.logg.ReadOnly = true;
             this.logg.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.logg.Size = new System.Drawing.Size(1581, 475);
+            this.logg.Size = new System.Drawing.Size(1184, 389);
             this.logg.TabIndex = 0;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.fBox);
+            this.tabPage1.Controls.Add(this.label6);
             this.tabPage1.Controls.Add(this.addSiFiles);
             this.tabPage1.Controls.Add(this.addSiFiBox);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.addSiSaBox);
             this.tabPage1.Controls.Add(this.label2);
-            this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabPage1.Size = new System.Drawing.Size(1589, 483);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Size = new System.Drawing.Size(1190, 390);
             this.tabPage1.TabIndex = 9;
             this.tabPage1.Text = "Штампы";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -1002,11 +989,9 @@
             // addSiFiles
             // 
             this.addSiFiles.FormattingEnabled = true;
-            this.addSiFiles.ItemHeight = 16;
-            this.addSiFiles.Location = new System.Drawing.Point(35, 113);
-            this.addSiFiles.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.addSiFiles.Location = new System.Drawing.Point(26, 118);
             this.addSiFiles.Name = "addSiFiles";
-            this.addSiFiles.Size = new System.Drawing.Size(721, 340);
+            this.addSiFiles.Size = new System.Drawing.Size(542, 251);
             this.addSiFiles.TabIndex = 5;
             this.addSiFiles.SelectedIndexChanged += new System.EventHandler(this.addSiFiles_SelectedIndexChanged);
             // 
@@ -1016,20 +1001,18 @@
             this.addSiFiBox.FormattingEnabled = true;
             this.addSiFiBox.Items.AddRange(new object[] {
             "Нет"});
-            this.addSiFiBox.Location = new System.Drawing.Point(277, 69);
-            this.addSiFiBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.addSiFiBox.Location = new System.Drawing.Point(208, 83);
             this.addSiFiBox.Name = "addSiFiBox";
-            this.addSiFiBox.Size = new System.Drawing.Size(479, 24);
+            this.addSiFiBox.Size = new System.Drawing.Size(360, 21);
             this.addSiFiBox.TabIndex = 4;
             this.addSiFiBox.SelectedIndexChanged += new System.EventHandler(this.addSiFiBox_SelectedIndexChanged);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(31, 69);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(23, 83);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(137, 16);
+            this.label5.Size = new System.Drawing.Size(128, 15);
             this.label5.TabIndex = 3;
             this.label5.Text = "Файл штампа (PNG):";
             // 
@@ -1041,41 +1024,49 @@
             "Нет",
             "Да, сохранять в новый",
             "Да, добавлять в исходный файл"});
-            this.addSiSaBox.Location = new System.Drawing.Point(277, 21);
-            this.addSiSaBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.addSiSaBox.Location = new System.Drawing.Point(208, 17);
             this.addSiSaBox.Name = "addSiSaBox";
-            this.addSiSaBox.Size = new System.Drawing.Size(479, 24);
+            this.addSiSaBox.Size = new System.Drawing.Size(360, 21);
             this.addSiSaBox.TabIndex = 2;
             this.addSiSaBox.SelectedIndexChanged += new System.EventHandler(this.addSiSaBox_SelectedIndexChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(31, 23);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(23, 19);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(182, 16);
+            this.label2.Size = new System.Drawing.Size(168, 15);
             this.label2.TabIndex = 0;
             this.label2.Text = "Добавлять штамп подписи:";
             // 
-            // stnew
+            // label6
             // 
-            this.stnew.Name = "stnew";
-            this.stnew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
-            this.stnew.Size = new System.Drawing.Size(574, 24);
-            this.stnew.Text = "Добавить штамп подписи и сохранить в новый файл ...";
-            this.stnew.Click += new System.EventHandler(this.stnew_Click);
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(23, 51);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(53, 15);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "Шрифт:";
+            // 
+            // fBox
+            // 
+            this.fBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.fBox.FormattingEnabled = true;
+            this.fBox.Location = new System.Drawing.Point(208, 51);
+            this.fBox.Name = "fBox";
+            this.fBox.Size = new System.Drawing.Size(360, 21);
+            this.fBox.TabIndex = 7;
+            this.fBox.SelectedIndexChanged += new System.EventHandler(this.fBox_SelectedIndexChanged);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1597, 674);
+            this.ClientSize = new System.Drawing.Size(1198, 548);
             this.Controls.Add(this.txtLogOut);
             this.Controls.Add(this.statusStrip5);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
             this.Text = "ПОДПИСАКА";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
@@ -1218,6 +1209,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ToolStripMenuItem btnStamp;
         private System.Windows.Forms.ToolStripMenuItem stnew;
+        private System.Windows.Forms.ComboBox fBox;
+        private System.Windows.Forms.Label label6;
     }
 }
 

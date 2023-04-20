@@ -1,7 +1,9 @@
 ﻿using dkxce;
+using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -10,8 +12,9 @@ namespace DigitalCertAndSignMaker
 {
     public partial class MainForm : Form
     {
-        internal IniFile iniFile = new IniFile();        
-
+        internal IniFile iniFile = new IniFile();
+        PrivateFontCollection pfc = new PrivateFontCollection();
+        FontFamily fontFamily = new FontFamily("Arial");
         public MainForm()
         {
             InitializeComponent();
@@ -63,8 +66,26 @@ namespace DigitalCertAndSignMaker
 
             if (iniFile.FFLVHL != null)
                 for (int i = 0; i < iniFile.FFLVHL.Length; i++)
-                    filesListView.Columns[i].Width = iniFile.FFLVHL[i];            
+                    filesListView.Columns[i].Width = iniFile.FFLVHL[i];
+
+            LoadFonts();
         }       
+
+        private void LoadFonts()
+        {
+            string[] fonts = Directory.GetFiles(System.Xml.XMLSaved<int>.CurrentDirectory(), "*.ttf", SearchOption.AllDirectories);
+            foreach (string f in fonts)
+                pfc.AddFontFile(f);
+            foreach (FontFamily ff in pfc.Families)
+            {
+                fBox.Items.Add(ff.Name);
+                if (ff.Name == iniFile.AddStampFont)
+                {
+                    fontFamily = ff;
+                    fBox.SelectedIndex = fBox.Items.Count - 1;
+                };
+            };
+        }
 
         private void ProcessCmdArgFiles()
         {
@@ -687,6 +708,16 @@ namespace DigitalCertAndSignMaker
             if(sfd.ShowDialog() == DialogResult.OK)
                 AddStampToPDF(fn, sfd.FileName);
             sfd.Dispose();
+        }
+
+        private void fBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            foreach (FontFamily ff in pfc.Families)
+                if (ff.Name == fBox.Text)
+                {
+                    fontFamily = ff;
+                    iniFile.AddStampFont = ff.Name;
+                };
         }
     }
 }

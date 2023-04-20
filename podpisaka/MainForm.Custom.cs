@@ -590,7 +590,7 @@ namespace DigitalCertAndSignMaker
                     for (int i = 0; i < text.Count && i < points.Count; i++)
                     {
                         string txt = text[i];
-                        Font f = new Font("PT Sans", textSize, i == 1 ? FontStyle.Bold : FontStyle.Regular);
+                        Font f = new Font(fontFamily, textSize, i == 1 ? FontStyle.Bold : FontStyle.Regular);
                         while ((g.MeasureString(txt, f).Width + points[i].X + 10) > bmp.Width) txt = txt.Remove(txt.Length - 1);
                         g.DrawString(txt, f, Brushes.Black, points[i]);
                     };
