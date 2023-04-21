@@ -1,8 +1,8 @@
 ﻿//
-// C# (WinAPI)
-// MSol.MachineManager.ShellLink
-// v 0.1, 16.09.2022
-// artem.karimov@weadmire.io
+// C#
+// DigitalCertAndSignMaker
+// v 0.28, 12.04.2023
+// https://github.com/dkxce/Pospisaka
 // en,ru,1251,utf-8
 //
 

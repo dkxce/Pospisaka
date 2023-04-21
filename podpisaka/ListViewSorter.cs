@@ -1,4 +1,13 @@
-﻿using System;
+﻿//
+// C#
+// DigitalCertAndSignMaker
+// v 0.28, 12.04.2023
+// https://github.com/dkxce/Pospisaka
+// en,ru,1251,utf-8
+//
+
+
+using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;

@@ -1,5 +1,15 @@
-﻿using dkxce;
-using Org.BouncyCastle.Security;
+﻿//
+// C#
+// DigitalCertAndSignMaker
+// v 0.28, 12.04.2023
+// https://github.com/dkxce/Pospisaka
+// en,ru,1251,utf-8
+//
+
+
+using dkxce;
+using Org.BouncyCastle.Cms;
+using podpisaka;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,6 +17,7 @@ using System.Drawing.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace DigitalCertAndSignMaker
 {
@@ -55,6 +66,15 @@ namespace DigitalCertAndSignMaker
             SetCurrentCert(iniFile.currentCertificate);
             ClickSM(iniFile.signCreateMethod);
             dsval.Checked = iniFile.checkCertValid;
+            saepBox.SelectedIndex = iniFile.AddStampEachPage;
+            saipBox.SelectedIndex = iniFile.AddStampOnPage;
+            saedBox.SelectedIndex = iniFile.AddSignToDoc;
+            sanf.SelectedIndex = iniFile.AddSignToNewDoc;
+            tsAuthor.Text = iniFile.Author;
+            tsReason.Text = iniFile.Reason;
+            tsContact.Text = iniFile.Contact;
+            tsLocation.Text = iniFile.Location;
+            adanaBox.SelectedIndex = iniFile.AddAnnot ? 1 : 0;
 
             if (iniFile.CSLVHL != null)
                 for (int i = 0; i < iniFile.CSLVHL.Length; i++)
@@ -579,11 +599,9 @@ namespace DigitalCertAndSignMaker
             iniFile.ImportScanPath = path;
 
             List<string> files = new List<string>();
-            bool first = true;
             foreach(string f in fexts) 
             { try { files.AddRange(Directory.GetFiles(path, f, SearchOption.AllDirectories)); } catch { }; }
-                
-            
+                            
             if(files.Count > 0) ProcessDroppedFiles(files.ToArray(), "Найдено", false);
         }
 
@@ -675,6 +693,12 @@ namespace DigitalCertAndSignMaker
         private void addSiSaBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             iniFile.AddStampMode = (byte)addSiSaBox.SelectedIndex;
+            saepBox.Enabled = addSiSaBox.SelectedIndex > 0 && saedBox.SelectedIndex == 0;
+            if (saedBox.SelectedIndex > 0) saepBox.SelectedIndex = 0;
+            saipBox.Enabled = addSiSaBox.SelectedIndex > 0;
+            sanf.Enabled = addSiSaBox.SelectedIndex > 0 || saedBox.SelectedIndex > 0;            
+            fBox.Enabled = addSiSaBox.SelectedIndex > 0;
+            addSiFiBox.Enabled = addSiSaBox.SelectedIndex > 0;
         }
 
         private void addSiFiBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -693,21 +717,76 @@ namespace DigitalCertAndSignMaker
         {
             if (filesListView.SelectedItems.Count == 0) return;
             string fn = filesListView.SelectedItems[0].SubItems[1].Text;
-            AddStampToPDF(fn);
+            if (Path.GetExtension(fn).ToLower() != ".pdf")
+                MessageBox.Show($"Файл {Path.GetFileName(fn)} не является PDF-документом", "Добавление оттиска подписи в документ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else
+                AddStampToPDF(fn);
+        }
+
+        private void AddStampToPDF(string fn, string newFileName = null)
+        {
+            CertificateHash ch = null;
+            if (string.IsNullOrEmpty(iniFile.currentCertificate))
+            {
+                fileStatus.Text = "Не выбран сертификат для подписи";
+                return;
+            }
+            else
+            {
+                ch = GetCurrentCert(iniFile.currentCertificate);
+                if (ch == null || (!string.IsNullOrEmpty(ch.File) && (!File.Exists(ch.File))))
+                {
+                    fileStatus.Text = "Не найден сертификат для подписи";
+                    return;
+                };
+            };
+
+            try
+            {
+                string stampFile = Path.Combine(XMLSaved<int>.CurrentDirectory(), iniFile.AddStampFile);
+                if (string.IsNullOrEmpty(stampFile) || (!File.Exists(stampFile)))
+                    MessageBox.Show($"Файл штампа не найден: {iniFile.AddStampFile}", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else
+                {
+                    if (!string.IsNullOrEmpty(newFileName))
+                    {
+                        File.Copy(fn, newFileName, true);
+                        fn = newFileName;
+                    };
+                    PDFSignData sd = new PDFSignData() { Mode = PDFSignData.StampMode.OnlyStamp, Offset = (PDFSignData.StampOffset)iniFile.AddStampOnPage, EachPage = iniFile.AddStampEachPage > 0, AddAnnot = iniFile.AddAnnot };
+                    bool added = PDFStamper.AddStamp(stampFile, fontFamily, ch, fn, sd);
+                    if (added)
+                        MessageBox.Show($"Штамп успешно добавлен в файл `{Path.GetFileName(fn)}`", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    else
+                    {
+                        try { if ((!string.IsNullOrEmpty(newFileName)) && File.Exists(fn)) File.Delete(newFileName); } catch { };
+                        MessageBox.Show($"Не удалось добавить штамп в файл `{Path.GetFileName(fn)}`\r\n\r\nВозможно штам уже был добавлен ранее!", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    };
+                };
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{ex.Message}", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            };
         }
 
         private void stnew_Click(object sender, EventArgs e)
         {
             if (filesListView.SelectedItems.Count == 0) return;
             string fn = filesListView.SelectedItems[0].SubItems[1].Text;
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = Path.GetDirectoryName(fn);
-            sfd.Filter = "PDF Files (*.pdf)|*.pdf";
-            sfd.FileName = $"{Path.Combine(Path.GetDirectoryName(fn), Path.GetFileNameWithoutExtension(fn) + "_stamped" + Path.GetExtension(fn))}";
-            sfd.DefaultExt = ".pdf";
-            if(sfd.ShowDialog() == DialogResult.OK)
-                AddStampToPDF(fn, sfd.FileName);
-            sfd.Dispose();
+            if (Path.GetExtension(fn).ToLower() != ".pdf")
+                MessageBox.Show($"Файл {Path.GetFileName(fn)} не является PDF-документом", "Добавление оттиска подписи в документ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else
+            {
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.InitialDirectory = Path.GetDirectoryName(fn);
+                sfd.Filter = "PDF Files (*.pdf)|*.pdf";
+                sfd.FileName = $"{Path.Combine(Path.GetDirectoryName(fn), Path.GetFileNameWithoutExtension(fn) + "_stamped" + Path.GetExtension(fn))}";
+                sfd.DefaultExt = ".pdf";
+                if (sfd.ShowDialog() == DialogResult.OK)
+                    AddStampToPDF(fn, sfd.FileName);
+                sfd.Dispose();
+            };
         }
 
         private void fBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -718,6 +797,55 @@ namespace DigitalCertAndSignMaker
                     fontFamily = ff;
                     iniFile.AddStampFont = ff.Name;
                 };
+        }
+
+        private void saepBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            iniFile.AddStampEachPage = (byte)saepBox.SelectedIndex;
+        }
+
+        private void saipBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            iniFile.AddStampOnPage = (byte)saipBox.SelectedIndex;
+        }
+
+        private void saedBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            iniFile.AddSignToDoc = (byte)saedBox.SelectedIndex;
+            saepBox.Enabled = addSiSaBox.SelectedIndex > 0 && saedBox.SelectedIndex == 0;
+            if (saedBox.SelectedIndex > 0) saepBox.SelectedIndex = 0;
+            sanf.Enabled = addSiSaBox.SelectedIndex > 0 || saedBox.SelectedIndex > 0;
+            panel2.Enabled = saedBox.SelectedIndex > 0;
+        }
+
+        private void sanf_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            iniFile.AddSignToNewDoc = (byte)sanf.SelectedIndex;
+        }
+
+        private void tsAuthor_TextChanged(object sender, EventArgs e)
+        {
+            iniFile.Author = tsAuthor.Text;
+        }
+
+        private void tsReason_TextChanged(object sender, EventArgs e)
+        {
+            iniFile.Reason = tsReason.Text;
+        }
+
+        private void tsContact_TextChanged(object sender, EventArgs e)
+        {
+            iniFile.Contact = tsContact.Text;
+        }
+
+        private void tsLocation_TextChanged(object sender, EventArgs e)
+        {
+            iniFile.Location = tsLocation.Text;
+        }
+
+        private void adanaBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            iniFile.AddAnnot = adanaBox.SelectedIndex > 0;
         }
     }
 }

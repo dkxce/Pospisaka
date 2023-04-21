@@ -1,4 +1,12 @@
-﻿using System.IO;
+﻿//
+// C#
+// DigitalCertAndSignMaker
+// v 0.28, 12.04.2023
+// https://github.com/dkxce/Pospisaka
+// en,ru,1251,utf-8
+//
+
+using System.IO;
 using System.Xml.Serialization;
 
 namespace System.Xml

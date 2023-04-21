@@ -1,4 +1,13 @@
-﻿using System;
+﻿//
+// C#
+// DigitalCertAndSignMaker
+// v 0.28, 12.04.2023
+// https://github.com/dkxce/Pospisaka
+// en,ru,1251,utf-8
+//
+
+
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
@@ -55,6 +64,18 @@ namespace DigitalCertAndSignMaker
         [XmlElement("AddStampFont")]
         public string AddStampFont = "PT Sans";
 
+        [XmlElement("StampOnEachPage")]
+        public byte AddStampEachPage = 0;
+
+        [XmlElement("StampPagePosition")]
+        public byte AddStampOnPage = 0;
+
+        [XmlElement("SignPDFDocument")]
+        public byte AddSignToDoc = 0;
+
+        [XmlElement("SignPDFAsNew")]
+        public byte AddSignToNewDoc = 0;
+
         [XmlArray("CSLVHL")]
         public int[] CSLVHL = null;
 
@@ -63,5 +84,20 @@ namespace DigitalCertAndSignMaker
 
         [XmlArray("FFLVHL")]
         public int[] FFLVHL = null;
+
+        [XmlElement("SignAuthor")]
+        public string Author = null;
+
+        [XmlElement("SignReason")]
+        public string Reason = "Я подтверждаю подлинность этого документа";
+
+        [XmlElement("SignContact")]
+        public string Contact = null;
+
+        [XmlElement("SignLocation")]
+        public string Location = null;
+
+        [XmlElement("AddAnnotation")]
+        public bool AddAnnot = false;
     }
 }
