@@ -410,7 +410,7 @@ namespace DigitalCertAndSignMaker
             Application.DoEvents();
             
             string fn = lvi.SubItems[1].Text;
-            bool isPdf = Path.GetExtension(fn).ToLower() == ".pfd";
+            bool isPdf = Path.GetExtension(fn).ToLower() == ".pdf";
             string nfn = null;
 
             if (isPdf && (iniFile.AddSignToNewDoc == 0) && (iniFile.AddStampMode > 0 || iniFile.AddSignToDoc > 0))

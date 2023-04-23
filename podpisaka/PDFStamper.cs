@@ -14,12 +14,16 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography.Pkcs;
+using System.Windows.Forms;
 using dkxce;
+using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.security;
 using iTextSharp.text.xml.xmp;
 using iTextSharp.xmp.impl;
+using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.X509;
+using static iTextSharp.text.pdf.codec.TiffWriter;
 
 namespace podpisaka
 {
@@ -132,7 +136,7 @@ namespace podpisaka
                     for (int i = 0; i < text.Count && i < points.Count; i++)
                     {
                         string txt = text[i];
-                        Font f = new Font(fontFamily, textSize, i == 1 ? FontStyle.Bold : FontStyle.Regular);
+                        System.Drawing.Font f = new System.Drawing.Font(fontFamily, textSize, i == 1 ? FontStyle.Bold : FontStyle.Regular);
                         while ((g.MeasureString(txt, f).Width + points[i].X + 10) > bmp.Width) txt = txt.Remove(txt.Length - 1);
                         g.DrawString(txt, f, new SolidBrush(color), points[i]);
                     };
@@ -225,16 +229,16 @@ namespace podpisaka
         }
 
         private static bool AddSignature(string src, Stream outStream, dkxce.CertificateHash ch, iTextSharp.text.Image image, PDFSignData signdata)
-        {                        
+        {
             PdfReader reader = new PdfReader(src);
-            
+
             PdfStamper stamper = PdfStamper.CreateSignature(reader, outStream, '\0', null, true); // PdfStamper.CreateSignature(reader, outStream, '\0'); 
             stamper.MoreInfo = signdata.Meta.getMetaData();
             stamper.XmpMetadata = signdata.Meta.getStreamedMetaData();
 
             int lastAddedPage = GetLastAddedPage(reader, ch.Thumbprint, ref signdata.Offset, out bool annotated);
-            if((!annotated) && (signdata.AddAnnot))
-                AddAnnotation(stamper, StampAnnoName, ch.Thumbprint, reader.NumberOfPages, signdata.Offset);
+            if ((!annotated) && (signdata.AddAnnot))
+                AddAnnotation(stamper, StampAnnoName, ch.Thumbprint, reader.NumberOfPages, signdata.Offset);            
 
             PdfSignatureAppearance sap = stamper.SignatureAppearance;
             sap.Reason = signdata.Reason;
@@ -242,18 +246,20 @@ namespace podpisaka
             sap.Location = signdata.Location;
             sap.SignatureGraphic = image;
             sap.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC;
+            //sap.CertificationLevel = PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED;
             if (signdata.Mode == PDFSignData.StampMode.SignAndStamp)
             {
                 PointF p = GetXYToStampOfPage(reader, stamper, new iTextSharp.text.pdf.parser.PdfReaderContentParser(reader), reader.NumberOfPages, image, signdata.Offset);
-                sap.SetVisibleSignature(new iTextSharp.text.Rectangle(p.X, p.Y, p.X+image.PlainWidth, p.Y + image.PlainHeight), 1, null);
+                sap.SetVisibleSignature(new iTextSharp.text.Rectangle(p.X, p.Y, p.X + image.PlainWidth, p.Y + image.PlainHeight), 1, null);
             };
-            
+
+            //X509Certificate cert = Org.BouncyCastle.Security.DotNetUtilities.FromX509Certificate(ch.Certificate);
             X509Certificate[] chain = new X509Certificate[] { new X509CertificateParser().ReadCertificate(ch.Certificate.RawData) };
             Exception exc = null;
             IExternalSignature externalSignature = null;
             if (externalSignature == null) try { externalSignature = new X509Certificate2Signature(ch.Certificate, "sha256" /* chain[0].SigAlgName */ ); } catch (Exception ex) { exc = ex; };
-            if (externalSignature == null) try { externalSignature = new X509Certificate2Signature(ch.Certificate, "sha1" /* chain[0].SigAlgName */ ); } catch (Exception ex) { exc = ex; };            
-            if (externalSignature == null) try { externalSignature = new X509Certificate2Signature(ch.Certificate, "SHA-1" /* chain[0].SigAlgName */ ); } catch (Exception ex) { exc = ex; };            
+            if (externalSignature == null) try { externalSignature = new X509Certificate2Signature(ch.Certificate, "sha1" /* chain[0].SigAlgName */ ); } catch (Exception ex) { exc = ex; };
+            if (externalSignature == null) try { externalSignature = new X509Certificate2Signature(ch.Certificate, "SHA-1" /* chain[0].SigAlgName */ ); } catch (Exception ex) { exc = ex; };
             if (externalSignature == null) try { externalSignature = new X509Certificate2Signature(ch.Certificate, ch.Certificate?.SignatureAlgorithm?.FriendlyName /*  "SHA-1"  */ ); } catch (Exception ex) { exc = ex; };
             if (externalSignature == null) try { externalSignature = new X509Certificate2Signature(ch.Certificate, ch.Certificate?.SignatureAlgorithm?.Value /*  "SHA-1"  */ ); } catch (Exception ex) { exc = ex; };
             if (externalSignature == null)
@@ -267,10 +273,9 @@ namespace podpisaka
                     try { externalSignature = new X509Certificate2Signature(ch.Certificate, v); break; } catch (Exception ex) { exc = ex; };
                 };
             };
-            // if (externalSignature == null) try { externalSignature = new X509ExternalSignature(ch.Certificate, ch.Certificate.GetKeyAlgorithm()); } catch (Exception ex) { exc = ex; };
+            if (externalSignature == null) try { externalSignature = new X509ExternalSignature(src, ch.Certificate, ch.Certificate.GetKeyAlgorithm()); } catch (Exception ex) { exc = ex; };
             if (externalSignature == null) throw exc;
             MakeSignature.SignDetached(sap, externalSignature, chain, null, null, null, 0, CryptoStandard.CMS);
-            
 
             stamper.Close();
 
@@ -404,7 +409,7 @@ namespace podpisaka
 
     public class X509ExternalSignature : IExternalSignature
     {
-        /// <summary>
+        private string sourceFile;
         /// The certificate with the private key
         /// </summary>
         private System.Security.Cryptography.X509Certificates.X509Certificate2 certificate;
@@ -420,12 +425,14 @@ namespace podpisaka
         /// <param name="certificate">The certificate with the private key</param>
         /// <param name="hashAlgorithm">The hash algorithm for the signature. As the Windows CAPI is used
         /// to do the signature the only hash guaranteed to exist is SHA-1</param>
-        public X509ExternalSignature(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, string hashAlgorithm)
+        public X509ExternalSignature(string sourceFile, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, string hashAlgorithm)
         {
+            if (string.IsNullOrEmpty(sourceFile)) throw new FileNotFoundException("No file");
+            this.sourceFile = sourceFile;
             if (!certificate.HasPrivateKey) throw new ArgumentException("No private key.");
             this.certificate = certificate;
-            this.hashAlgorithm = "sha256"; // hashAlgorithm; // DigestAlgorithms.GetDigest(DigestAlgorithms.GetAllowedDigests(hashAlgorithm));
-            this.encryptionAlgorithm = "ECDSA";
+            this.hashAlgorithm = "SHA256"; // hashAlgorithm; // DigestAlgorithms.GetDigest(DigestAlgorithms.GetAllowedDigests(hashAlgorithm));
+            this.encryptionAlgorithm = "RSA"; // "ECDSA";
             try
             {
                 if (certificate.PrivateKey is System.Security.Cryptography.RSACryptoServiceProvider)
@@ -455,10 +462,14 @@ namespace podpisaka
             }
             catch { };
 
-            ContentInfo content = new ContentInfo(message);
+            //byte[] documentBytes = File.ReadAllBytes(this.sourceFile);
+
+            ContentInfo content = new ContentInfo(message /*documentBytes*/);
             SignedCms signed = new SignedCms(content, true);
             CmsSigner signer = new System.Security.Cryptography.Pkcs.CmsSigner(certificate);
-            signer.IncludeOption = System.Security.Cryptography.X509Certificates.X509IncludeOption.None;
+            signer.DigestAlgorithm = new System.Security.Cryptography.Oid("SHA256"); //(new Org.BouncyCastle.Crypto.Digests.Sha256Digest()).
+            signer.IncludeOption = System.Security.Cryptography.X509Certificates.X509IncludeOption.EndCertOnly;
+
             signed.ComputeSignature(signer);
             byte[] result = signed.Encode();
             return result;
