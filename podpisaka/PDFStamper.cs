@@ -37,7 +37,7 @@ namespace podpisaka
             string tempFile = null;
             try
             {
-                Bitmap bitmap = PrepareStampBitmap(stampFile, certificateHash, fontFamily);
+                Bitmap bitmap = PrepareStampBitmap(stampFile, certificateHash, fontFamily, Color.Black);
                 iTextSharp.text.Image image = PrepareImage(bitmap);
                 tempFile = Path.GetTempFileName();
                 bool modified = false;
@@ -88,27 +88,27 @@ namespace podpisaka
             finally { try { if(!string.IsNullOrEmpty(tempFile)) File.Delete(tempFile); } catch { }; };
         }
 
-        public static Bitmap PrepareStampBitmap(string imageFile, dkxce.CertificateHash certificateHash, FontFamily fontFamily)
+        public static Bitmap PrepareStampBitmap(string imageFile, dkxce.CertificateHash certificateHash, FontFamily fontFamily, Color color)
         {
             List<string> sInfo = new List<string>(new string[] {
                 certificateHash.Thumbprint,
                 certificateHash.Owner,
                 $"c {certificateHash.From:dd.MM.yyyy} по {certificateHash.Till:dd.MM.yyyy}" });
             Bitmap bmp = (Bitmap)Bitmap.FromFile(imageFile);
-            PrepareStampBitmap(bmp, fontFamily, sInfo);
+            PrepareStampBitmap(bmp, fontFamily, color, sInfo);
             return bmp;
         }
 
-        public static void PrepareStampBitmap(Bitmap bmp, dkxce.CertificateHash certificateHash, FontFamily fontFamily)
+        public static void PrepareStampBitmap(Bitmap bmp, dkxce.CertificateHash certificateHash, FontFamily fontFamily, Color color)
         {
             List<string> sInfo = new List<string>(new string[] {
                 certificateHash.Thumbprint,
                 certificateHash.Owner,
                 $"c {certificateHash.From:dd.MM.yyyy} по {certificateHash.Till:dd.MM.yyyy}" });
-            PrepareStampBitmap(bmp, fontFamily, sInfo);
+            PrepareStampBitmap(bmp, fontFamily, color, sInfo);
         }
 
-        public static void PrepareStampBitmap(Bitmap bmp, FontFamily fontFamily, List<string> text = null)
+        public static void PrepareStampBitmap(Bitmap bmp, FontFamily fontFamily, Color color, List<string> text = null)
         {
             List<PointF> points = new List<PointF>();
             for (int h = 0; h < bmp.Height; h++)
@@ -134,7 +134,7 @@ namespace podpisaka
                         string txt = text[i];
                         Font f = new Font(fontFamily, textSize, i == 1 ? FontStyle.Bold : FontStyle.Regular);
                         while ((g.MeasureString(txt, f).Width + points[i].X + 10) > bmp.Width) txt = txt.Remove(txt.Length - 1);
-                        g.DrawString(txt, f, Brushes.Black, points[i]);
+                        g.DrawString(txt, f, new SolidBrush(color), points[i]);
                     };
                 };
             };

@@ -13,8 +13,12 @@ using podpisaka;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
@@ -61,7 +65,7 @@ namespace DigitalCertAndSignMaker
             for (int i = iniFile.History.Count - 1; i >= 100; i--) iniFile.History.RemoveAt(i);
             for (int i = iniFile.Docs.Count - 1; i >= 0; i--) if (!File.Exists(iniFile.Docs[i])) iniFile.Docs.RemoveAt(i);
             LoadDocsFromHistory();
-            txtLogOut.SelectedIndex = iniFile.lastPageSelected;
+            try { txtLogOut.SelectedIndex = iniFile.lastPageSelected; } catch { };
             storageSelector.SelectedIndex = iniFile.lastStorageSelected;
             SetCurrentCert(iniFile.currentCertificate);
             ClickSM(iniFile.signCreateMethod);
@@ -705,6 +709,11 @@ namespace DigitalCertAndSignMaker
         {
             string f = addSiFiBox.Text;
             if(f == "Нет") iniFile.AddStampFile = ""; else iniFile.AddStampFile = f;
+            LoadImagePreview(iniFile.AddStampFile);
+
+            CertificateHash ch = null;
+            if (selSert.Items.Count > 0) ch = ((ListViewDetailedItem)selSert.Items[0]).CertificateHash;
+            LoadStampPreview(iniFile.AddStampFile, ch, Color.Maroon);
         }
 
         private void addSiFiles_SelectedIndexChanged(object sender, EventArgs e)
@@ -846,6 +855,163 @@ namespace DigitalCertAndSignMaker
         private void adanaBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             iniFile.AddAnnot = adanaBox.SelectedIndex > 0;
+        }
+
+        private Bitmap LoadImagePreview(string file)
+        {
+            pb1.Image = null;
+            if (string.IsNullOrEmpty(file)) return null;
+            if (file.Contains(":")) file = Path.Combine(XMLSaved<int>.CurrentDirectory(), file);
+            if (!File.Exists(file)) return null;
+
+            Bitmap b = null;
+            try
+            {
+                b = (Bitmap)Bitmap.FromFile(file);
+                if (b.Width > pb1.Width || b.Height > pb1.Height)
+                    pb1.Image = ResizeImage(b, pb1.Width, pb1.Height);
+                else
+                    pb1.Image = b;
+            }
+            catch { };
+            return b;
+        }
+
+        private Bitmap LoadStampPreview(string file, CertificateHash ch, Color color, bool askPass = false)
+        {
+            pb2.Image = null;
+            if (string.IsNullOrEmpty(file)) return null;
+            if (ch == null) return null;
+            if (ch.Certificate == null) try { ch = GetCurrentCert(ch.Thumbprint); } catch { };
+            if (ch.Certificate == null) try {
+                    string pass = null;
+                    if(ch.Source == "File" && askPass)
+                    {
+                        DialogResult dr = InputBox.QueryPass("Подписание документов", $"Введите пароль для {Path.GetFileName(ch.File)}:", ref pass);
+                        if (dr != DialogResult.OK) return null;
+                    };
+                    ch.Certificate = (new PKCS7Signer(ch.File, pass)).Certificate; 
+                } catch { };
+            if (ch.Certificate == null) return null;
+            if (file.Contains(":")) file = Path.Combine(XMLSaved<int>.CurrentDirectory(), file);
+            if (!File.Exists(file)) return null;
+
+            Bitmap b = null;
+            try
+            {
+                b = (Bitmap)Bitmap.FromFile(file);
+                PDFStamper.PrepareStampBitmap(b, ch, fontFamily, color);
+                if (b.Width > pb2.Width || b.Height > pb2.Height)
+                    pb2.Image = ResizeImage(b, pb2.Width, pb2.Height);
+                else
+                    pb2.Image = b;
+            }
+            catch { };
+            return b;
+        }
+
+        public static Bitmap ResizeImage(Image image, int width, int height, bool keepAspectRation = true)
+        {
+            int sourceWidth = image.Width;
+            int sourceHeight = image.Height;
+            int sourceX = 0;
+            int sourceY = 0;
+            int destX = 0;
+            int destY = 0;
+
+            int destWidth = width;
+            int destHeight = height;
+
+            if (keepAspectRation)
+            {
+                float nPercent = 0;
+                float nPercentW = ((float)width / (float)sourceWidth);
+                float nPercentH = ((float)height / (float)sourceHeight);
+
+                if (nPercentH < nPercentW)
+                {
+                    nPercent = nPercentH;
+                    destX = System.Convert.ToInt16((width - (sourceWidth * nPercent)) / 2);
+                }
+                else
+                {
+                    nPercent = nPercentW;
+                    destY = System.Convert.ToInt16((height - (sourceHeight * nPercent)) / 2);
+                };
+
+                destWidth = (int)(sourceWidth * nPercent);
+                destHeight = (int)(sourceHeight * nPercent);
+            };
+
+            Bitmap bmPhoto = new Bitmap(width, height);//, PixelFormat.Format24bppRgb);
+            //bmPhoto.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            Graphics g = Graphics.FromImage(bmPhoto);
+            //g.Clear(Color.White);
+            //g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.DrawImage(image, new Rectangle(destX, destY, destWidth, destHeight), new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight), GraphicsUnit.Pixel);
+            g.Dispose();
+            return bmPhoto;
+        }
+
+        private void pb2_DoubleClick(object sender, EventArgs e)
+        {
+            if (pb2.Image == null) return;
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Title = "Сохранить PNG";
+            sfd.DefaultExt = ".png";
+            sfd.Filter = "Portable Network Graphics File (*.png)|*.png";
+            if(sfd.ShowDialog() == DialogResult.OK)
+            {
+                CertificateHash ch = null;
+                if (selSert.Items.Count > 0) ch = ((ListViewDetailedItem)selSert.Items[0]).CertificateHash;
+                Bitmap bmp = LoadStampPreview(iniFile.AddStampFile, ch, Color.Black, true);
+                if(bmp != null) SavePNG(sfd.FileName, bmp);
+            };
+            sfd.Dispose();
+        }
+
+        private void pb1_DoubleClick(object sender, EventArgs e)
+        {
+            if (pb1.Image == null) return;
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Title = "Сохранить PNG";
+            sfd.DefaultExt = ".png";
+            sfd.Filter = "Portable Network Graphics File (*.png)|*.png";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                Bitmap bmp = LoadImagePreview(iniFile.AddStampFile);
+                if (bmp != null) SavePNG(sfd.FileName, bmp);
+            };
+            sfd.Dispose();
+        }
+
+        private void SavePNG(string file, Image bmp)
+        {
+            bmp.Save(file);
+        }
+
+        private void pb2_Click(object sender, EventArgs e)
+        {
+            string f = addSiFiBox.Text;
+            if (f == "Нет") iniFile.AddStampFile = ""; else iniFile.AddStampFile = f;
+            
+            CertificateHash ch = null;
+            if (selSert.Items.Count > 0) ch = ((ListViewDetailedItem)selSert.Items[0]).CertificateHash;
+            LoadStampPreview(iniFile.AddStampFile, ch, Color.Maroon, true);
+        }
+
+        private void cpyBtn_Click(object sender, EventArgs e)
+        {
+            if (cInfo.Items.Count == 0) return;
+            string txt = "Тип;Имя;Значение;\r\n";
+            for(int i=0;i<cInfo.Items.Count;i++) 
+            {
+                for (int j = 0; j < cInfo.Items[i].SubItems.Count; j++)
+                    txt += $"{cInfo.Items[i].SubItems[j].Text};";
+                txt += $"\r\n";
+            };
+            Clipboard.SetText(txt);
+            MessageBox.Show("Скопировано в буфер обмена","Информация о сертификате", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

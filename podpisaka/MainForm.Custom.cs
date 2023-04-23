@@ -833,6 +833,8 @@ namespace DigitalCertAndSignMaker
                 selSert.Items.Add(lvi);                
             };            
             if (storageSelector.SelectedIndex == 5) ReloadCertificates(storageSelector.SelectedIndex);
+
+            LoadStampPreview(iniFile.AddStampFile, ch, Color.Maroon);
         }
 
         private string GetPriorityText(dkxce.CertificateHash ch)
