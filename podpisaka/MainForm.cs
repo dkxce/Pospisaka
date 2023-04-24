@@ -27,6 +27,7 @@ namespace DigitalCertAndSignMaker
 {
     public partial class MainForm : Form
     {
+        internal object pb_over = null;
         internal IniFile iniFile = new IniFile();
         PrivateFontCollection pfc = new PrivateFontCollection();
         FontFamily fontFamily = new FontFamily("Arial");
@@ -93,6 +94,7 @@ namespace DigitalCertAndSignMaker
                     filesListView.Columns[i].Width = iniFile.FFLVHL[i];
 
             LoadFonts();
+            ResizeSplitter();
         }       
 
         private void LoadFonts()
@@ -445,6 +447,14 @@ namespace DigitalCertAndSignMaker
             iniFile.Maximized = this.WindowState == FormWindowState.Maximized;
         }
 
+        private void ResizeSplitter()
+        {
+            int cwidth = 0;
+            for(int i = 0; i < certList.Columns.Count; i++) cwidth += certList.Columns[i].Width;
+            if ((this.Width - cwidth) < 300) cwidth = this.Width - 300;
+            splitContainer1.SplitterDistance = cwidth;
+        }
+
         private void dsval_Click(object sender, EventArgs e)
         {
             iniFile.checkCertValid = dsval.Checked = !dsval.Checked;
@@ -630,6 +640,7 @@ namespace DigitalCertAndSignMaker
             for (int i = 0; i < certList.Columns.Count; i++)
                 if (certList.Columns[i].Width > 10)
                     iniFile.SSLVHL[i] = certList.Columns[i].Width;
+            // ResizeSplitter();
         }
 
         private void filesListView_ColumnWidthChanged(object sender, ColumnWidthChangedEventArgs e)
@@ -1012,6 +1023,29 @@ namespace DigitalCertAndSignMaker
             };
             Clipboard.SetText(txt);
             MessageBox.Show("Скопировано в буфер обмена","Информация о сертификате", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void svImg_Click(object sender, EventArgs e)
+        {
+            if (pb_over == null) return;
+            if (!(pb_over is PictureBox)) return;
+            string pb = ((PictureBox)pb_over).Name;
+            if (pb == "pb1") pb1_DoubleClick(sender, e);
+            if (pb == "pb2") pb2_DoubleClick(sender, e);
+        }
+
+        private void pb2_MouseHover(object sender, EventArgs e)
+        {
+            pb_over = sender;
+            if (pb_over == null) return;
+            if (!(pb_over is PictureBox)) return;
+            string pb = ((PictureBox)pb_over).Name;
+            renewim.Enabled = pb == "pb2";
+        }
+
+        private void renewim_Click(object sender, EventArgs e)
+        {
+            pb2_Click(sender, e);
         }
     }
 }

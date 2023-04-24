@@ -130,6 +130,9 @@
             this.logg = new System.Windows.Forms.TextBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.pb2 = new System.Windows.Forms.PictureBox();
+            this.imsave = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.renewim = new System.Windows.Forms.ToolStripMenuItem();
+            this.svImg = new System.Windows.Forms.ToolStripMenuItem();
             this.pb1 = new System.Windows.Forms.PictureBox();
             this.adanaBox = new System.Windows.Forms.ComboBox();
             this.label15 = new System.Windows.Forms.Label();
@@ -177,6 +180,7 @@
             this.logPage.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pb2)).BeginInit();
+            this.imsave.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pb1)).BeginInit();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -1076,6 +1080,7 @@
             // 
             // pb2
             // 
+            this.pb2.ContextMenuStrip = this.imsave;
             this.pb2.Location = new System.Drawing.Point(15, 352);
             this.pb2.Margin = new System.Windows.Forms.Padding(4);
             this.pb2.Name = "pb2";
@@ -1084,9 +1089,34 @@
             this.pb2.TabStop = false;
             this.pb2.Click += new System.EventHandler(this.pb2_Click);
             this.pb2.DoubleClick += new System.EventHandler(this.pb2_DoubleClick);
+            this.pb2.MouseHover += new System.EventHandler(this.pb2_MouseHover);
+            // 
+            // imsave
+            // 
+            this.imsave.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.imsave.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.renewim,
+            this.svImg});
+            this.imsave.Name = "imsave";
+            this.imsave.Size = new System.Drawing.Size(266, 80);
+            // 
+            // renewim
+            // 
+            this.renewim.Name = "renewim";
+            this.renewim.Size = new System.Drawing.Size(265, 24);
+            this.renewim.Text = "Обновить изображение";
+            this.renewim.Click += new System.EventHandler(this.renewim_Click);
+            // 
+            // svImg
+            // 
+            this.svImg.Name = "svImg";
+            this.svImg.Size = new System.Drawing.Size(265, 24);
+            this.svImg.Text = "Сохранить изображение ...";
+            this.svImg.Click += new System.EventHandler(this.svImg_Click);
             // 
             // pb1
             // 
+            this.pb1.ContextMenuStrip = this.imsave;
             this.pb1.Location = new System.Drawing.Point(784, 352);
             this.pb1.Margin = new System.Windows.Forms.Padding(4);
             this.pb1.Name = "pb1";
@@ -1094,6 +1124,7 @@
             this.pb1.TabIndex = 20;
             this.pb1.TabStop = false;
             this.pb1.DoubleClick += new System.EventHandler(this.pb1_DoubleClick);
+            this.pb1.MouseHover += new System.EventHandler(this.pb2_MouseHover);
             // 
             // adanaBox
             // 
@@ -1446,6 +1477,7 @@
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pb2)).EndInit();
+            this.imsave.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pb1)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
@@ -1582,6 +1614,9 @@
         private System.Windows.Forms.PictureBox pb2;
         private System.Windows.Forms.ContextMenuStrip cpyMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem cpyBtn;
+        private System.Windows.Forms.ContextMenuStrip imsave;
+        private System.Windows.Forms.ToolStripMenuItem svImg;
+        private System.Windows.Forms.ToolStripMenuItem renewim;
     }
 }
 
