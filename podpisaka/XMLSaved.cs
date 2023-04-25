@@ -7,6 +7,8 @@
 //
 
 using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 namespace System.Xml
@@ -73,6 +75,46 @@ namespace System.Xml
             };
         }
 
+        public static T Load(byte[] data)
+        {
+            try
+            {
+                System.Xml.Serialization.XmlSerializer xs = new System.Xml.Serialization.XmlSerializer(typeof(T));
+                MemoryStream ms = new MemoryStream(data);
+                System.IO.StreamReader reader = new StreamReader(ms);
+                T c = (T)xs.Deserialize(reader);
+                reader.Close();
+                ms.Close();
+                return c;
+            }
+            catch { };
+            {
+                Type type = typeof(T);
+                System.Reflection.ConstructorInfo c = type.GetConstructor(new Type[0]);
+                return (T)c.Invoke(null);
+            };
+        }
+
+        public static T Load(byte[] data, int index, int count)
+        {
+            try
+            {
+                System.Xml.Serialization.XmlSerializer xs = new System.Xml.Serialization.XmlSerializer(typeof(T));
+                MemoryStream ms = new MemoryStream(data, index, count);
+                System.IO.StreamReader reader = new StreamReader(ms);
+                T c = (T)xs.Deserialize(reader);
+                reader.Close();
+                ms.Close();
+                return c;
+            }
+            catch { };
+            {
+                Type type = typeof(T);
+                System.Reflection.ConstructorInfo c = type.GetConstructor(new Type[0]);
+                return (T)c.Invoke(null);
+            };
+        }
+
         public static T LoadHere(string file)
         {
             return Load(System.IO.Path.Combine(CurrentDirectory(), file));
@@ -96,6 +138,35 @@ namespace System.Xml
             // return Environment.CurrentDirectory;
             // return System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
             // return System.IO.Path.GetDirectory(Application.ExecutablePath);
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class XmlCommentAttribute : Attribute
+    {
+        public XmlCommentAttribute(string value) { this.Value = value; }
+        public string Value { get; set; }
+    }
+
+    public static class XmlCommentExtensions
+    {
+        const string XmlCommentPropertyPostfix = "XmlComment";
+
+        static XmlCommentAttribute GetXmlCommentAttribute(this Type type, string memberName)
+        {
+            PropertyInfo member = type.GetProperty(memberName);
+            if (member == null) return null;
+            XmlCommentAttribute attr = member.GetCustomAttribute<XmlCommentAttribute>();
+            return attr;
+        }
+
+        public static XmlComment GetXmlComment(this Type type, [CallerMemberName] string memberName = "")
+        {
+            XmlCommentAttribute attr = GetXmlCommentAttribute(type, memberName);
+            if (attr == null && memberName.EndsWith(XmlCommentPropertyPostfix))
+                    attr = GetXmlCommentAttribute(type, memberName.Substring(0, memberName.Length - XmlCommentPropertyPostfix.Length));
+            if (attr == null || string.IsNullOrEmpty(attr.Value)) return null;
+            return new XmlDocument().CreateComment(attr.Value);
         }
     }
 }

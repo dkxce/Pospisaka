@@ -19,9 +19,15 @@ using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
+using System.Runtime.ConstrainedExecution;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Tls;
+using Org.BouncyCastle.Ocsp;
 
 namespace DigitalCertAndSignMaker
 {
@@ -80,6 +86,9 @@ namespace DigitalCertAndSignMaker
             tsContact.Text = iniFile.Contact;
             tsLocation.Text = iniFile.Location;
             adanaBox.SelectedIndex = iniFile.AddAnnot ? 1 : 0;
+            inccb.Checked = iniFile.inccb;
+            textBox2.Text = iniFile.TextToEncrypt;            
+            textBox3.Text = iniFile.TextToDecrypt;            
 
             if (iniFile.CSLVHL != null)
                 for (int i = 0; i < iniFile.CSLVHL.Length; i++)
@@ -1046,6 +1055,69 @@ namespace DigitalCertAndSignMaker
         private void renewim_Click(object sender, EventArgs e)
         {
             pb2_Click(sender, e);
+        }
+
+        private void inccb_CheckedChanged(object sender, EventArgs e)
+        {
+            iniFile.inccb = inccb.Checked;
+        }
+
+        private void textBox2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter && e.Alt)
+                button2_Click(sender, e);
+        }
+
+        private void textBox3_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter && e.Alt)
+                button3_Click(sender, e);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            textBox3.Text = "В процессе...";
+            Application.DoEvents();
+            System.Threading.Thread.Sleep(125);
+            textBox3.Text = EncryptText(textBox2.Text);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            textBox2.Text = "В процессе...";
+            Application.DoEvents();
+            System.Threading.Thread.Sleep(125);
+            textBox2.Text = DecryptText(textBox3.Text);
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            try { System.Diagnostics.Process.Start(dixuUrl); } catch { };
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            try { System.Diagnostics.Process.Start(dixuUrl); } catch { };
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            iniFile.TextToEncrypt = textBox2.Text;
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            iniFile.TextToDecrypt = textBox3.Text;
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            textBox2.Clear();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            textBox3.Clear();
         }
     }
 }

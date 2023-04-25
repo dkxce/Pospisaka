@@ -9,13 +9,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace DigitalCertAndSignMaker
 {
     public class IniFile: XMLSaved<IniFile>
-    {
+    {        
         [XmlElement("Maximized")]
         public bool Maximized = false;
 
@@ -99,5 +100,37 @@ namespace DigitalCertAndSignMaker
 
         [XmlElement("AddAnnotation")]
         public bool AddAnnot = false;
+        
+        [XmlElement("EncDecInContainer")]
+        public bool inccb = true;
+
+        [XmlElement("TextToEncrypt")]
+        public string TextToEncrypt = "\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\"";
+
+        [XmlElement("TextToDecrypt")]
+        public string TextToDecrypt = "";
+    }
+
+    public class ContainerInfo: XMLSaved<ContainerInfo>
+    {
+        [XmlAnyElement("CreatorXmlComment")]
+        public XmlComment CreatorXmlComment { get { return GetType().GetXmlComment(); } set { } }
+
+        [XmlComment("Minimal Version 1.0.2.19")]
+        public string Creator { set; get; } = "Podpisaka by dkxce";
+
+        [XmlAnyElement("UrlXmlComment")]
+        public XmlComment UrlXmlComment { get { return GetType().GetXmlComment(); } set { } }
+
+        [XmlComment("Author: https://github.com/dkxce")]
+        public string Url { set; get; } = "https://github.com/dkxce/Pospisaka";
+
+        public string OriginalFile;
+        public string Thumbprint;
+
+        public int FileAttrs;
+        public DateTime FileCreated;
+        public long FileLength;
+        public DateTime FileModified;        
     }
 }

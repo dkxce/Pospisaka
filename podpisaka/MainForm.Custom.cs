@@ -14,8 +14,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -35,6 +38,7 @@ namespace DigitalCertAndSignMaker
         private string formCaption = "ПОДПИСАКА";
         private string webURLS = "https://github.com/dkxce";
         private string webURL = "https://github.com/dkxce/Pospisaka";
+        private string dixuUrl = "https://github.com/dkxce/DIXU";
 
         private bool firstLoad = true;
         private string iniPath = Path.Combine(XMLSaved<int>.CurrentDirectory(), "podpisaka.xml");        
@@ -52,6 +56,8 @@ namespace DigitalCertAndSignMaker
             IntPtr hSysMenu = GetSystemMenu(this.Handle, false);
             AppendMenu(hSysMenu, 0x000, 0x01, "Author: dkxce");            
             AppendMenu(hSysMenu, 0x000, 0x02, webURL);
+            AppendMenu(hSysMenu, 0x000, 0x08, $"DIXU: {dixuUrl}");
+            AppendMenu(hSysMenu, 0x000, 0x09, "XCA: X - Certificate and Key management");
             AppendMenu(hSysMenu, 0x800, 0x03, string.Empty);            
             AppendMenu(hSysMenu, 0x000, 0x04, "Создать ярлык на Рабочем столе");
             AppendMenu(hSysMenu, 0x000, 0x05, "Создать ярлык в меню Пуск");
@@ -100,7 +106,15 @@ namespace DigitalCertAndSignMaker
             if ((m.Msg == 0x112) && ((int)m.WParam == 0x07))
             {
                 try { System.Diagnostics.Process.Start("certmgr.msc"); } catch { };
-            };            
+            };
+            if ((m.Msg == 0x112) && ((int)m.WParam == 0x08))
+            {
+                try { System.Diagnostics.Process.Start(dixuUrl); } catch { };
+            };
+            if ((m.Msg == 0x112) && ((int)m.WParam == 0x09))
+            {
+                try { System.Diagnostics.Process.Start("https://hohnstaedt.de/xca/"); } catch { };
+            };
         }
 
         private void ClearCurrentFileInfo()
@@ -115,8 +129,43 @@ namespace DigitalCertAndSignMaker
             };
         }
 
+        public static Control FindControlAtPoint(Control container, Point pos)
+        {
+            Control child;
+            foreach (Control c in container.Controls)
+            {
+                if (c.Visible && c.Bounds.Contains(pos))
+                {
+                    child = FindControlAtPoint(c, new Point(pos.X - c.Left, pos.Y - c.Top));
+                    if (child == null) return c;
+                    else return child;
+                }
+            }
+            return null;
+        }
+
+        public static Control FindControlAtCursor(Form form)
+        {
+            Point pos = Cursor.Position;
+            if (form.Bounds.Contains(pos))
+                return FindControlAtPoint(form, form.PointToClient(pos));
+            return null;
+        }
+
         private void ProcessDroppedFiles(string[] files, string suff = "Переброшено", bool overwrite = true)
         {
+            if(txtLogOut.SelectedTab.Text == "Шифрование файлов")
+            {
+                Control c = FindControlAtCursor(this);
+                if (c == null) return;
+                if (!(c is GroupBox)) return;
+
+                GroupBox gb = (GroupBox)c;
+                if (gb.Name == "groupBox1") EncryptFiles(files, iniFile.inccb);
+                if (gb.Name == "groupBox2") DecryptFiles(files);
+                return;
+            };
+
             if ((!overwrite) && (files != null) && (files.Length > 0))
             {
                 List<string> ff = new List<string>(files);
@@ -862,6 +911,243 @@ namespace DigitalCertAndSignMaker
         private void SetCandidate(dkxce.CertificateHash ch)
         {            
             ssc.Text = GetPriorityText(ch);
+        }
+
+        private void EncryptFiles(string[] files, bool inccont = false)
+        {
+            CertificateHash ch = null;
+            if (selSert.Items.Count > 0) ch = ((ListViewDetailedItem)selSert.Items[0]).CertificateHash;
+            if (ch == null) return;
+            if (ch.Certificate == null) try { ch = GetCurrentCert(ch.Thumbprint); } catch { };
+            if (ch.Certificate == null) try
+                {
+                    string pass = null;
+                    if (ch.Source == "File")
+                    {
+                        DialogResult dr = InputBox.QueryPass("Шифрование файлов", $"Введите пароль для {Path.GetFileName(ch.File)}:", ref pass);
+                        if (dr != DialogResult.OK) return;
+                    };
+                    ch.Certificate = (new PKCS7Signer(ch.File, pass)).Certificate;
+                }
+                catch { };
+            if (ch.Certificate == null) return;
+            byte[] key = GetKeyFromCert(ch);
+
+            foreach (string f in files)
+            {
+                byte[] data = null;
+                try { data = File.ReadAllBytes(f); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка чтения файла:\r\n{f}\r\n\r\n{ex.Message}", "Шифрование файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    continue;
+                };                
+
+                try
+                {
+                    string s = $"{Path.Combine(Path.GetDirectoryName(f), $"{Path.GetFileNameWithoutExtension(f)}_enc{Path.GetExtension(f)}")}";
+                    if (inccont) s = $"{Path.Combine(Path.GetDirectoryName(f), $"{Path.GetFileNameWithoutExtension(f)}.pzp")}";
+                    
+                    SaveFileDialog sfd = new SaveFileDialog();
+                    sfd.Filter = "Все типы файлов (*.*)|*.*";
+                    sfd.FileName = s;
+                    sfd.InitialDirectory = Path.GetDirectoryName(f);
+                    if (sfd.ShowDialog() != DialogResult.OK) continue;
+                    s = sfd.FileName;
+
+                    byte[] res = dkxce.Crypt.DIXU.Encrypt(data, System.Text.Encoding.ASCII.GetBytes(dkxce.Crypt.DIXU.STANDARD_SHIFT), key);
+                    FileStream fs = new FileStream(s, FileMode.Create, FileAccess.Write);
+                    if (inccont)
+                    {
+                        FileInfo fi = new FileInfo(f);
+                        ContainerInfo ci = new ContainerInfo() { OriginalFile = Path.GetFileName(f), Thumbprint = ch.Thumbprint, FileCreated = fi.CreationTimeUtc, FileModified = fi.LastWriteTimeUtc, FileAttrs = (int)fi.Attributes, FileLength = fi.Length };
+                        string sci = ContainerInfo.Save(ci);
+                        using (GZipStream zipStream = new GZipStream(fs, CompressionMode.Compress, true))
+                        {
+                            byte[] hdr = Encoding.UTF8.GetBytes(sci + "\r\n\r\n");
+                            zipStream.Write(hdr, 0, hdr.Length);
+                            zipStream.Write(res, 0, res.Length);
+                        };
+                    }
+                    else
+                        fs.Write(res, 0, res.Length);
+                    fs.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка кодирования файла:\r\n{f}\r\n\r\n{ex.Message}", "Шифрование файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    continue;
+                };
+            };
+        }
+        
+        private void DecryptFiles(string[] files)
+        {
+            CertificateHash ch = null;
+            if (selSert.Items.Count > 0) ch = ((ListViewDetailedItem)selSert.Items[0]).CertificateHash;
+            if (ch == null) return;
+            if (ch.Certificate == null) try { ch = GetCurrentCert(ch.Thumbprint); } catch { };
+            if (ch.Certificate == null) try
+                {
+                    string pass = null;
+                    if (ch.Source == "File")
+                    {
+                        DialogResult dr = InputBox.QueryPass("Дешифрование файлов", $"Введите пароль для {Path.GetFileName(ch.File)}:", ref pass);
+                        if (dr != DialogResult.OK) return;
+                    };
+                    ch.Certificate = (new PKCS7Signer(ch.File, pass)).Certificate;
+                }
+                catch { };
+            if (ch.Certificate == null) return;
+            byte[] key = GetKeyFromCert(ch);
+
+            foreach (string f in files)
+            {
+                byte[] data = null;
+                try { data = File.ReadAllBytes(f); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка чтения файла:\r\n{f}\r\n\r\n{ex.Message}", "Дешифрование файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    continue;
+                };
+
+                try
+                {
+                    ContainerInfo ci = new ContainerInfo();
+
+                    string s = $"{Path.Combine(Path.GetDirectoryName(f), $"{Path.GetFileNameWithoutExtension(f)}_dec{Path.GetExtension(f)}")}";
+                    bool incccont = Path.GetExtension(f).ToLower() == ".pzp";
+                    if (incccont)
+                    {                        
+                        using (MemoryStream os = new MemoryStream())
+                        {
+                            using (MemoryStream ms = new MemoryStream(data))
+                            using (GZipStream gzip = new GZipStream(ms, CompressionMode.Decompress))
+                                gzip.CopyTo(os);
+                            data = os.ToArray();
+                        };
+
+                        int crlfcrlf = FindPos(data, new byte[] { 0x0D, 0x0A, 0x0D, 0x0A });
+                        ci = ContainerInfo.Load(data, 0, crlfcrlf);
+                        byte[] dataArray = new byte[data.Length - crlfcrlf - 4];
+                        Array.Copy(data, crlfcrlf + 4, dataArray, 0, dataArray.Length);
+                        data = dataArray;
+                        s = ci.OriginalFile;
+
+                        if(ci.Thumbprint.ToUpper() != ch.Thumbprint.ToUpper())
+                        {
+                            MessageBox.Show($"Файл {Path.GetFileName(f)} был закодирован с помощью другого сертификата!\r\nИспользуемый сертификат: {ch.Thumbprint}\r\nСертификат контейнера: {ci.Thumbprint}", "Дешифрование файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            continue;
+                        };                        
+                    };
+
+                    SaveFileDialog sfd = new SaveFileDialog();
+                    sfd.Filter = "Все типы файлов (*.*)|*.*";
+                    sfd.FileName = s;
+                    sfd.InitialDirectory = Path.GetDirectoryName(f);
+                    if (sfd.ShowDialog() != DialogResult.OK) continue;
+                    s = sfd.FileName;                    
+                    byte[] res = dkxce.Crypt.DIXU.Decrypt(data, System.Text.Encoding.ASCII.GetBytes(dkxce.Crypt.DIXU.STANDARD_SHIFT), key);
+                    FileStream fs = new FileStream(s, FileMode.Create, FileAccess.Write);                    
+                    fs.Write(res, 0, res.Length);
+                    fs.Close();
+
+                    if (incccont)
+                    {
+                        File.SetAttributes(s, (FileAttributes)ci.FileAttrs);
+                        File.SetCreationTimeUtc(s, ci.FileCreated);
+                        File.SetLastWriteTimeUtc(s, ci.FileModified);
+                    };
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка декодирования файла:\r\n{f}\r\n\r\n{ex.Message}", "Дешифрование файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    continue;
+                };
+            };
+        }
+
+        private string EncryptText(string text)
+        {
+            CertificateHash ch = null;
+            if (selSert.Items.Count > 0) ch = ((ListViewDetailedItem)selSert.Items[0]).CertificateHash;
+            if (ch == null) return "";
+            if (ch.Certificate == null) try { ch = GetCurrentCert(ch.Thumbprint); } catch { };
+            if (ch.Certificate == null) try
+                {
+                    string pass = null;
+                    if (ch.Source == "File")
+                    {
+                        DialogResult dr = InputBox.QueryPass("Шифрование текста", $"Введите пароль для {Path.GetFileName(ch.File)}:", ref pass);
+                        if (dr != DialogResult.OK) return "";
+                    };
+                    ch.Certificate = (new PKCS7Signer(ch.File, pass)).Certificate;
+                }
+                catch { };
+            if (ch.Certificate == null) return "";
+            byte[] key = GetKeyFromCert(ch);
+
+            try
+            {
+                byte[] res = dkxce.Crypt.DIXU.Encrypt(System.Text.Encoding.UTF8.GetBytes(text), System.Text.Encoding.ASCII.GetBytes(dkxce.Crypt.DIXU.STANDARD_SHIFT), key);
+                return Convert.ToBase64String(res);
+            }
+            catch (Exception ex) { return ex.Message; };
+            return "";
+        }
+
+        private string DecryptText(string text)
+        {
+            CertificateHash ch = null;
+            if (selSert.Items.Count > 0) ch = ((ListViewDetailedItem)selSert.Items[0]).CertificateHash;
+            if (ch == null) return "";
+            if (ch.Certificate == null) try { ch = GetCurrentCert(ch.Thumbprint); } catch { };
+            if (ch.Certificate == null) try
+                {
+                    string pass = null;
+                    if (ch.Source == "File")
+                    {
+                        DialogResult dr = InputBox.QueryPass("Дешифрование текста", $"Введите пароль для {Path.GetFileName(ch.File)}:", ref pass);
+                        if (dr != DialogResult.OK) return "";
+                    };
+                    ch.Certificate = (new PKCS7Signer(ch.File, pass)).Certificate;
+                }
+                catch { };
+            if (ch.Certificate == null) return "";
+            byte[] key = GetKeyFromCert(ch);
+
+            try
+            {                
+                byte[] res = dkxce.Crypt.DIXU.Decrypt(Convert.FromBase64String(text), System.Text.Encoding.ASCII.GetBytes(dkxce.Crypt.DIXU.STANDARD_SHIFT), key);
+                return System.Text.Encoding.UTF8.GetString(res);
+            }
+            catch (Exception ex) { return ex.Message; };
+            return "";
+        }
+
+        private static byte[] GetKeyFromCert(CertificateHash ch)
+        {
+            List<byte> lkey = new List<byte>();
+            if (!string.IsNullOrEmpty(ch.Thumbprint)) lkey.AddRange(System.Text.Encoding.ASCII.GetBytes(ch.Thumbprint.ToUpper()));
+            if(ch.Certificate != null) lkey.AddRange(ch.Certificate.GetPublicKey());
+            if (!string.IsNullOrEmpty(ch.Serial)) lkey.AddRange(System.Text.Encoding.ASCII.GetBytes(ch.Serial.ToUpper()));
+            BitConverter.GetBytes(ch.From.Date.ToBinary());
+            BitConverter.GetBytes(ch.Till.Date.ToBinary());
+            if(!string.IsNullOrEmpty(ch.MD5)) lkey.AddRange(System.Text.Encoding.ASCII.GetBytes(ch.MD5.ToUpper()));
+            if (!string.IsNullOrEmpty(ch.Owner)) lkey.AddRange(System.Text.Encoding.UTF8.GetBytes(ch.Owner.ToUpper()));            
+            return lkey.ToArray();
+        }
+
+        private static int FindPos(byte[] source, byte[] search)
+        {
+            int i = 0, c = 0;
+            byte B = source[c++];
+            while (i < search.Length)
+            {
+                if (B != search[i++]) i = 0;
+                try { B = source[c++]; } catch { return -1; };
+            };
+            return --c - search.Length;
         }
     }
 
