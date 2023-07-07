@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography.X509Certificates;
@@ -459,7 +460,9 @@ namespace DigitalCertAndSignMaker
             Application.DoEvents();
             
             string fn = lvi.SubItems[1].Text;
-            bool isPdf = Path.GetExtension(fn).ToLower() == ".pdf";
+            string fe = Path.GetExtension(fn).ToLower();
+            bool isPdf = fe == ".pdf";
+            bool isPE = fe == ".exe" || fe == ".dll" || fe == ".msi";
             string nfn = null;
 
             if (isPdf && (iniFile.AddSignToNewDoc == 0) && (iniFile.AddStampMode > 0 || iniFile.AddSignToDoc > 0))
@@ -477,7 +480,36 @@ namespace DigitalCertAndSignMaker
                     Logger.AddLine("");
                     Logger.AddLine($"  - Подписание", false);
                     Logger.AddLine($"  - Файл: {fn}", false);
+
                     FileInfo fi = new FileInfo(fn);
+                    if (isPE)
+                    {
+                        string fss = "";
+                        string pfs = GetFileSize(fn, out _);
+                        string afs = GetFileSize(fn, out _);
+                        Logger.AddLine($"  - PE/Размер: {GetFileSize(fn, out _)}, создан: {fi.CreationTime}, изменен: {fi.LastWriteTime}", false);
+                        Logger.AddLine($"  - PE/Сертификат: {GetPriorityText(ch)}", false);
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(ch.File))
+                            {
+                                bool res = dkxce.SignificatePE.SignWithCert(fi.FullName, ch.File, pass);
+                                fss = dkxce.SignificatePE.GetLastError()?.Message;
+                                if (string.IsNullOrEmpty(fss)) fss = $"{res}";
+                            }
+                            else
+                            {
+                                bool res = dkxce.SignificatePE.SignWithThumbprint(fi.FullName, ch.Thumbprint);
+                                fss = dkxce.SignificatePE.GetLastError()?.Message;
+                                if (string.IsNullOrEmpty(fss)) fss = $"{res}";
+                            };
+                            fi = new FileInfo(fn);
+                        }
+                        catch (Exception errex) { fss = $"Ошибка, {errex.Message}"; };
+                        Logger.AddLine($"  - PE/Внедрение цифровой подписи: {pfs} -> {afs}", false);
+                        Logger.AddLine($"  - PE/Статус: {fss}", false);
+                    };
+                    
                     Logger.AddLine($"  - Размер: {GetFileSize(fn, out _)}, создан: {fi.CreationTime}, изменен: {fi.LastWriteTime}", false);
                     Logger.AddLine($"  - Сертификат: {GetPriorityText(ch)}", false);
                     if (ch.Certificate != null) s = new PKCS7Signer(ch.Certificate);
@@ -779,6 +811,21 @@ namespace DigitalCertAndSignMaker
         {
             if (lvi.CertificateHash == null) return;
             dkxce.CertificateHash h = lvi.CertificateHash;
+
+            //X509Certificate2 certificate = h.Certificate;
+            //X509Store store = new X509Store(StoreName.TrustedPublisher, StoreLocation.LocalMachine);
+
+            //store.Open(OpenFlags.ReadWrite);
+            //store.Add(certificate);
+            //store.Close();
+
+            //using (X509Store store = new X509Store(StoreName.TrustedPeople, StoreLocation.LocalMachine))
+            //{
+            //    store.Open(OpenFlags.ReadWrite);
+            //    store.Add(h.Certificate); //where cert is an X509Certificate object
+            //}
+            ////
+
             RemoveCertFromFav(h);
             iniFile.Favorites.Add(h);
             lvi.Favorite = true;

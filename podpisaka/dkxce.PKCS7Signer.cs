@@ -334,7 +334,7 @@ namespace dkxce
             CmsSigner signer = new Pkcs.CmsSigner(_PrivateCert);
             // Sign the message.
             signed.ComputeSignature(signer);
-
+            
             certInfo = "";
             foreach (X509.X509Certificate el in signed.Certificates)
                 certInfo += "--- CERTIFICATE BEGIN ---\r\n\r\n" + el.ToString() + "\r\n--- CERTIFICATE END ---\r\n";

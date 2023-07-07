@@ -536,7 +536,7 @@ namespace DigitalCertAndSignMaker
         }
 
         private void addfs_Click(object sender, EventArgs e)
-        {
+        {           
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = "Добавление файлов";
             ofd.Filter = "Все типы (*.*)|*.*";
