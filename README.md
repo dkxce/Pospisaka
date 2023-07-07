@@ -6,4 +6,4 @@
 
 #### ИЗМЕНЕНИЯ ####
 **v1.0.3.0**:
-- Добавлена поддержка внедрения подписи в exe/dll/msi файлы
+- Добавлена поддержка внедрения подписи в exe/dll/msi файлы (aka [signtool](https://learn.microsoft.com/ru-ru/windows/win32/seccrypto/signtool))
