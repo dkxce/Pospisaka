@@ -3,6 +3,7 @@
 // dkxce.SignificatePE
 // http://github.com/dkxce/SignificatePE
 // en,ru,1251,utf-8
+// (OLD VERSION, DO NOT COPY)
 //
 
 using System;
