@@ -1,7 +1,7 @@
 ﻿//
 // C#
 // DigitalCertAndSignMaker
-// v 0.28, 12.04.2023
+// v 0.29, 19.11.2024
 // https://github.com/dkxce/Pospisaka
 // en,ru,1251,utf-8
 //
@@ -65,6 +65,9 @@ namespace DigitalCertAndSignMaker
         [XmlElement("AddStampFont")]
         public string AddStampFont = "PT Sans";
 
+        [XmlElement("FontCorrection")]
+        public short FontCorrection = 0;
+
         [XmlElement("StampOnEachPage")]
         public byte AddStampEachPage = 0;
 
@@ -73,6 +76,9 @@ namespace DigitalCertAndSignMaker
 
         [XmlElement("SignPDFDocument")]
         public byte AddSignToDoc = 0;
+
+        [XmlElement("SignPDFDocumentAlgo")]
+        public byte AddSignToDocAlgo = 0;
 
         [XmlElement("SignPDFAsNew")]
         public byte AddSignToNewDoc = 0;

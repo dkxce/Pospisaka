@@ -1,0 +1,47 @@
+2024-11-19 15:21:15 (вторник): 
+  - Подписание
+  - Файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Размер: 985.88 KB, создан: 19.11.2024 15:21:15, изменен: 17.10.2024 17:20:11
+  - Сертификат: UB3APB [578F82FA921494175B2F1242086C941128D2307B] (E: karimovar@gmail.com, E: ub3apb@gmail.com) / dkxce CA
+  - Ошибка: Указан неправильный алгоритм. 
+
+2024-11-19 15:21:32 (вторник): 
+  - Подписание
+  - Файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Размер: 985.88 KB, создан: 19.11.2024 15:21:15, изменен: 17.10.2024 17:20:11
+  - Сертификат: UB3APB [578F82FA921494175B2F1242086C941128D2307B] (E: karimovar@gmail.com, E: ub3apb@gmail.com) / dkxce CA
+  - Добавлен штамп в файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Подписан: 19.11.2024 15:21:33
+
+2024-11-19 15:22:09 (вторник): 
+  - Подписание
+  - Файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Размер: 985.88 KB, создан: 19.11.2024 15:21:15, изменен: 17.10.2024 17:20:11
+  - Сертификат: UB3APB [578F82FA921494175B2F1242086C941128D2307B] (E: karimovar@gmail.com, E: ub3apb@gmail.com) / dkxce CA
+  - Добавлен штамп в файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Подписан: 19.11.2024 15:22:11
+
+2024-11-19 15:22:31 (вторник): 
+  - Подписание
+  - Файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Размер: 985.88 KB, создан: 19.11.2024 15:21:15, изменен: 17.10.2024 17:20:11
+  - Сертификат: UB3APB [578F82FA921494175B2F1242086C941128D2307B] (E: karimovar@gmail.com, E: ub3apb@gmail.com) / dkxce CA
+  - Добавлен штамп в файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Подписан: 19.11.2024 15:22:32
+
+2024-11-19 15:22:50 (вторник): 
+  - Подписание
+  - Файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Размер: 985.88 KB, создан: 19.11.2024 15:21:15, изменен: 17.10.2024 17:20:11
+  - Сертификат: UB3APB [578F82FA921494175B2F1242086C941128D2307B] (E: karimovar@gmail.com, E: ub3apb@gmail.com) / dkxce CA
+  - Добавлен штамп в файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Подписан: 19.11.2024 15:22:52
+
+2024-11-19 15:23:08 (вторник): 
+  - Подписание
+  - Файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Размер: 985.88 KB, создан: 19.11.2024 15:21:15, изменен: 17.10.2024 17:20:11
+  - Сертификат: UB3APB [578F82FA921494175B2F1242086C941128D2307B] (E: karimovar@gmail.com, E: ub3apb@gmail.com) / dkxce CA
+  - Добавлен штамп в файл: C:\Downloads\Metodika_podklyucheniya_k_SUDIR_Vnutrenniy_5.6_stamped.pdf
+  - Подписан: 19.11.2024 15:23:09
+

@@ -1,33 +1,22 @@
 ﻿//
 // C#
 // DigitalCertAndSignMaker
-// v 0.28, 12.04.2023
+// v 0.29, 19.11.2024
 // https://github.com/dkxce/Pospisaka
 // en,ru,1251,utf-8
 //
 
 
 using dkxce;
-using Org.BouncyCastle.Cms;
 using podpisaka;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-using System.Runtime.ConstrainedExecution;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Tls;
-using Org.BouncyCastle.Ocsp;
 
 namespace DigitalCertAndSignMaker
 {
@@ -80,6 +69,7 @@ namespace DigitalCertAndSignMaker
             saepBox.SelectedIndex = iniFile.AddStampEachPage;
             saipBox.SelectedIndex = iniFile.AddStampOnPage;
             saedBox.SelectedIndex = iniFile.AddSignToDoc;
+            try { saetBox.SelectedIndex = iniFile.AddSignToDocAlgo; } catch { saetBox.SelectedIndex = 0; };
             sanf.SelectedIndex = iniFile.AddSignToNewDoc;
             tsAuthor.Text = iniFile.Author;
             tsReason.Text = iniFile.Reason;
@@ -118,8 +108,9 @@ namespace DigitalCertAndSignMaker
                 {
                     fontFamily = ff;
                     fBox.SelectedIndex = fBox.Items.Count - 1;
-                };
+                };                
             };
+            fcBox.Value = iniFile.FontCorrection;
         }
 
         private void ProcessCmdArgFiles()
@@ -717,12 +708,13 @@ namespace DigitalCertAndSignMaker
         private void addSiSaBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             iniFile.AddStampMode = (byte)addSiSaBox.SelectedIndex;
-            saepBox.Enabled = addSiSaBox.SelectedIndex > 0 && saedBox.SelectedIndex == 0;
+            saepBox.Enabled = addSiSaBox.SelectedIndex > 0;
             if (saedBox.SelectedIndex > 0) saepBox.SelectedIndex = 0;
             saipBox.Enabled = addSiSaBox.SelectedIndex > 0;
-            sanf.Enabled = addSiSaBox.SelectedIndex > 0 || saedBox.SelectedIndex > 0;            
-            fBox.Enabled = addSiSaBox.SelectedIndex > 0;
+            sanf.Enabled = addSiSaBox.SelectedIndex > 0 || saedBox.SelectedIndex > 0;
+            fcBox.Enabled = fBox.Enabled = addSiSaBox.SelectedIndex > 0;
             addSiFiBox.Enabled = addSiSaBox.SelectedIndex > 0;
+            adanaBox.Enabled = addSiSaBox.SelectedIndex > 0 || saedBox.SelectedIndex > 0;
         }
 
         private void addSiFiBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -782,8 +774,8 @@ namespace DigitalCertAndSignMaker
                         File.Copy(fn, newFileName, true);
                         fn = newFileName;
                     };
-                    PDFSignData sd = new PDFSignData() { Mode = PDFSignData.StampMode.OnlyStamp, Offset = (PDFSignData.StampOffset)iniFile.AddStampOnPage, EachPage = iniFile.AddStampEachPage > 0, AddAnnot = iniFile.AddAnnot };
-                    bool added = PDFStamper.AddStamp(stampFile, fontFamily, ch, fn, sd);
+                    PDFSignData sd = new PDFSignData() { Mode = PDFSignData.StampMode.OnlyStamp, Offset = (PDFSignData.StampOffset)iniFile.AddStampOnPage, EachPage = (PDFSignData.StampWhere)iniFile.AddStampEachPage, AddAnnot = iniFile.AddAnnot };
+                    bool added = PDFStamper.AddStamp(stampFile, fontFamily, iniFile.FontCorrection, ch, fn, sd, iniFile.AddSignToDocAlgo);
                     if (added)
                         MessageBox.Show($"Штамп успешно добавлен в файл `{Path.GetFileName(fn)}`", "Добавление штампа", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     else
@@ -840,11 +832,13 @@ namespace DigitalCertAndSignMaker
 
         private void saedBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            iniFile.AddSignToDoc = (byte)saedBox.SelectedIndex;
-            saepBox.Enabled = addSiSaBox.SelectedIndex > 0 && saedBox.SelectedIndex == 0;
+            iniFile.AddSignToDoc = (byte)saedBox.SelectedIndex;            
+            saepBox.Enabled = addSiSaBox.SelectedIndex > 0;
+            saetBox.Enabled = saedBox.SelectedIndex > 0;
             if (saedBox.SelectedIndex > 0) saepBox.SelectedIndex = 0;
             sanf.Enabled = addSiSaBox.SelectedIndex > 0 || saedBox.SelectedIndex > 0;
             panel2.Enabled = saedBox.SelectedIndex > 0;
+            adanaBox.Enabled = addSiSaBox.SelectedIndex > 0 || saedBox.SelectedIndex > 0;
         }
 
         private void sanf_SelectedIndexChanged(object sender, EventArgs e)
@@ -920,7 +914,7 @@ namespace DigitalCertAndSignMaker
             try
             {
                 b = (Bitmap)Bitmap.FromFile(file);
-                PDFStamper.PrepareStampBitmap(b, ch, fontFamily, color);
+                PDFStamper.PrepareStampBitmap(b, ch, fontFamily, iniFile.FontCorrection, color);
                 if (b.Width > pb2.Width || b.Height > pb2.Height)
                     pb2.Image = ResizeImage(b, pb2.Width, pb2.Height);
                 else
@@ -1118,6 +1112,16 @@ namespace DigitalCertAndSignMaker
         private void button5_Click(object sender, EventArgs e)
         {
             textBox3.Clear();
+        }
+
+        private void saetBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            iniFile.AddSignToDocAlgo = (byte)saetBox.SelectedIndex;
+        }
+
+        private void fcBox_ValueChanged(object sender, EventArgs e)
+        {
+            iniFile.FontCorrection = (short)fcBox.Value;
         }
     }
 }

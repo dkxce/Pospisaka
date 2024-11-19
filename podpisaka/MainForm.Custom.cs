@@ -1,27 +1,25 @@
 ﻿//
 // C#
 // DigitalCertAndSignMaker
-// v 0.28, 12.04.2023
+// v 0.29, 19.11.2024
 // https://github.com/dkxce/Pospisaka
 // en,ru,1251,utf-8
 //
 
 
 using dkxce;
-using iTextSharp.text.pdf.qrcode;
 using podpisaka;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using static podpisaka.PDFSignData;
 
 namespace DigitalCertAndSignMaker
 {
@@ -58,7 +56,8 @@ namespace DigitalCertAndSignMaker
             AppendMenu(hSysMenu, 0x000, 0x01, "Author: dkxce");            
             AppendMenu(hSysMenu, 0x000, 0x02, webURL);
             AppendMenu(hSysMenu, 0x000, 0x08, $"DIXU: {dixuUrl}");
-            AppendMenu(hSysMenu, 0x000, 0x09, "XCA: X - Certificate and Key management");
+            AppendMenu(hSysMenu, 0x000, 0x0A, "PE: SignificatePE / Significator");
+            AppendMenu(hSysMenu, 0x000, 0x09, "XCA: X - Certificate and Key management");            
             AppendMenu(hSysMenu, 0x800, 0x03, string.Empty);            
             AppendMenu(hSysMenu, 0x000, 0x04, "Создать ярлык на Рабочем столе");
             AppendMenu(hSysMenu, 0x000, 0x05, "Создать ярлык в меню Пуск");
@@ -116,6 +115,10 @@ namespace DigitalCertAndSignMaker
             {
                 try { System.Diagnostics.Process.Start("https://hohnstaedt.de/xca/"); } catch { };
             };
+            if ((m.Msg == 0x112) && ((int)m.WParam == 0x0A))
+            {
+                try { System.Diagnostics.Process.Start("https://github.com/dkxce/SignificatePE"); } catch { };
+            };        
         }
 
         private void ClearCurrentFileInfo()
@@ -424,7 +427,7 @@ namespace DigitalCertAndSignMaker
             if (sign && (sCount > 0) && (!string.IsNullOrEmpty(ch.File)))
             {
                 DialogResult dr = InputBox.QueryPass("Подписание документов", $"Введите пароль для {Path.GetFileName(ch.File)}:", ref pass);
-                if(dr != DialogResult.OK)
+                if (dr != DialogResult.OK)
                 {
                     fileStatus.Text = "Прервано пользователем";
                     return;
@@ -527,7 +530,7 @@ namespace DigitalCertAndSignMaker
                             PDFSignData sd = new PDFSignData()
                             {
                                 Offset = (PDFSignData.StampOffset)iniFile.AddStampOnPage,
-                                EachPage = iniFile.AddStampEachPage > 0,
+                                EachPage = (StampWhere) iniFile.AddStampEachPage,
                                 AddAnnot = iniFile.AddAnnot,
                             };
                             if (iniFile.AddStampMode > 0 && iniFile.AddSignToDoc > 0) sd.Mode = PDFSignData.StampMode.SignAndStamp;
@@ -544,7 +547,7 @@ namespace DigitalCertAndSignMaker
                                 Logger.AddLine($"  - Файл штампа не найден: {iniFile.AddStampFile}", false);
                             else
                             {
-                                if (PDFStamper.AddStamp(stampFile, fontFamily, ch, fn, sd))
+                                if (PDFStamper.AddStamp(stampFile, fontFamily, iniFile.FontCorrection, ch, fn, sd, (byte)saetBox.SelectedIndex))
                                     Logger.AddLine($"  - Добавлен штамп в файл: {fn}", false);
                                 else
                                 {
